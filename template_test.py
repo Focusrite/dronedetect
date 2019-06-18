@@ -1,18 +1,20 @@
 import cv2 as cv
 import numpy as np
+import sys
 from pypylon import pylon
 
-img = cv.imread('balloon.png')
+img = cv.imread('balloon_with_pin.png')
 img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 img2 = img_gray.copy()
 
 found = None
 
 template = cv.imread('ballong.png', 0)
+template = cv.Canny(template, 50, 200)
 
 w, h = template.shape[::-1]
 
-for scale in np.linspace(0.2, 1.0, 10)[::-1]:
+for scale in np.linspace(0.2, 2.0, 20)[::-1]:
     img_gray = img2.copy()
     resized = cv.resize(img_gray, (int(img_gray.shape[1]*scale), int(img_gray.shape[0]*scale)), interpolation = cv.INTER_AREA)
     r = img_gray.shape[1] / float(resized.shape[1])
@@ -28,11 +30,13 @@ for scale in np.linspace(0.2, 1.0, 10)[::-1]:
     if found is None or max_val > found[0]:
         found = (max_val, max_loc, r)
 
-(_, max_loc, r) = found
+(max_val, max_loc, r) = found
 (startX, startY) = (int(max_loc[0] * r), int(max_loc[1]* r))
 (endX, endY) = (int((max_loc[0] + w) * r), int((max_loc[1] + h)*r))
 
 cv.rectangle(img, (startX, startY), (endX, endY), (0, 255, 0), 2)
+
+print("max_val is ", max_val)
 
 while True:
     cv.namedWindow('test', cv.WINDOW_NORMAL)

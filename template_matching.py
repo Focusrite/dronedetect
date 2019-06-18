@@ -2,6 +2,7 @@ import cv2 as cv
 import numpy as np
 import sys
 from pypylon import pylon
+from skimage.util import random_noise
 
 def template_matching(img,template):
     img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
@@ -19,7 +20,7 @@ def template_matching(img,template):
             break
 
         edged = cv.Canny(resized, 50, 200)
-        result = cv.matchTemplate(edged, template, cv.TM_CCOEFF)
+        result = cv.matchTemplate(edged, template, cv.TM_CCOEFF_NORMED)
 
         min_val, max_val, min_loc, max_loc = cv.minMaxLoc(result)
 
@@ -36,9 +37,13 @@ def template_matching(img,template):
     return img
 
 def test():
-    img = cv.imread('balloon_with_pin.png')
+    img = cv.imread('findballoon2.png')
+    #img = cv.GaussianBlur(img, (10,10),0)
     
-
+    #salt-and-pepper noise
+    #img = random_noise(img, mode='s&p',amount=0.3)
+    #img = np.array(255*img, dtype='uint8')
+    #img = cv.medianBlur(img,5)
     template = cv.imread('ballong.png', 0)
     template = cv.Canny(template, 50, 200)
     img = template_matching(img, template)

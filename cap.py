@@ -81,6 +81,10 @@ if __name__ == '__main__':
         ch = cv.waitKey(1)
         if ch == 27 or ch == ord('q'):
             break
+        if ch == ord('s'):
+            temp = cv.selectROI(im)
+            cv.imwrite('object.png',temp)
+            break
 
     cap.stop()
     cv.destroyAllWindows()

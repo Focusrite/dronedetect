@@ -1,3 +1,5 @@
+# template_matching.py
+
 import cv2 as cv
 import numpy as np
 import sys
@@ -18,8 +20,8 @@ def template_matching(img,template):
         if resized.shape[0] < h or resized.shape[1] < w:
             break
 
-        edged = cv.Canny(resized, 50, 200)
-        result = cv.matchTemplate(edged, template, cv.TM_CCOEFF)
+        cv.Canny(resized, 50, 200)
+        result = cv.matchTemplate(edged, template, cv.TM_CCOEFF_NORMED)
 
         min_val, max_val, min_loc, max_loc = cv.minMaxLoc(result)
 
@@ -32,8 +34,8 @@ def template_matching(img,template):
 
     cv.rectangle(img, (startX, startY), (endX, endY), (0, 255, 0), 2)
 
-    print("max_val is ", max_val)
-    return img
+    #print("max_val is ", max_val)
+    return img, (startX, startY), (endX, endY)
 
 def test():
     img = cv.imread('balloon_with_pin.png')

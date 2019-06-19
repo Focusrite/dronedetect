@@ -1,3 +1,5 @@
+# template_matching.py
+
 import cv2 as cv
 import numpy as np
 import sys
@@ -33,8 +35,8 @@ def template_matching(img,template):
 
     cv.rectangle(img, (startX, startY), (endX, endY), (0, 255, 0), 2)
 
-    print("max_val is ", max_val)
-    return img
+    #print("max_val is ", max_val)
+    return img, (startX, startY), (endX, endY)
 
 def test():
     img = cv.imread('images/findballoon_red.png')

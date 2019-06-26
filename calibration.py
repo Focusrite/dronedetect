@@ -11,9 +11,9 @@ objp[:,:2] = np.mgrid[0:7,0:9].T.reshape(-1,2)*20 # Square size = 20 mm
 objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
 
-for fname in os.listdir("calibration_images"):
+for fname in os.listdir("calibration_images2"):
     if fname.endswith(".png"):
-        img = cv.imread("calibration_images/" + fname)
+        img = cv.imread("calibration_images2/" + fname)
         gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         # Find the chess board corners
         ret, corners = cv.findChessboardCorners(gray, (7,9), None)
@@ -32,7 +32,7 @@ ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.sha
 
 #notice how its almost exactly the same, imagine cv2 is the namespace for cv 
 #in C++, only difference is FILE_STORGE_WRITE is exposed directly in cv2
-cv_file = cv.FileStorage("test.xml", cv.FILE_STORAGE_WRITE)
+cv_file = cv.FileStorage("camera2.xml", cv.FILE_STORAGE_WRITE)
 #creating a random matrix
 print("write matrix\n", mtx)
 # this corresponds to a key value pair, internally opencv takes your numpy 
@@ -43,3 +43,16 @@ print("write dist\n", dist)
 cv_file.write("distcoeffs", dist)
 # note you *release* you don't close() a FileStorage object
 cv_file.release()
+
+
+# just like before we specify an enum flag, but this time it is 
+# FILE_STORAGE_READ
+#cv_file = cv2.FileStorage("test.xml", cv2.FILE_STORAGE_READ)
+# for some reason __getattr__ doesn't work for FileStorage object in python
+# however in the C++ documentation, getNode, which is also available, 
+# does the same thing
+#note we also have to specify the type to retrieve other wise we only get a 
+# FileNode object back instead of a matrix
+#matrix = cv_file.getNode("my_matrix").mat()
+#print("read matrix\n", matrix)
+#cv_file.release()

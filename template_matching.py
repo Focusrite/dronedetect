@@ -39,16 +39,19 @@ def template_matching(img,template, interval):
     return img, max_val > 0.7, (startX, startY), (endX, endY), r 
 
 def test():
-    img = cv.imread('findballoon.png')
-    #img = cv.GaussianBlur(img, (10,10),0)
+
+    img = cv.imread('images/findballoon_red.png')
+    img = cv.GaussianBlur(img, (10,10),0)
     
     #salt-and-pepper noise
     #img = random_noise(img, mode='s&p',amount=0.3)
     #img = np.array(255*img, dtype='uint8')
     #img = cv.medianBlur(img,5)
-    template = cv.imread('ballong.png', 0)
-    #template = cv.Canny(template, 50, 200)
-    img, _, _, _, _ = template_matching(img, template, (0.2, 2.0, 10))
+
+    template = cv.imread('images/ballong.png', 0)
+    template = cv.Canny(template, 50, 200)
+    img = template_matching(img, template)
+
     while True:
         cv.namedWindow('test', cv.WINDOW_NORMAL)
         cv.imshow('test', img)

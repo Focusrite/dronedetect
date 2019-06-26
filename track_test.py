@@ -5,13 +5,14 @@ from pypylon import pylon
 from template_matching import template_matching
 from cap import Capture
 from color_matching import color_matching
+from boost_detection import boost_detection
 
 cap = Capture()
 has_detected = False
 lost_track = False
 frames_tracked = 0
 tracker = cv.TrackerCSRT_create()
-template = cv.imread('magnet.png', 0)
+template = cv.imread('balloon_template.png', 0)
 r = 1
 time = 0
 
@@ -24,8 +25,8 @@ while True:
             print("Error. empty result")
         else:
             timer = cv.getTickCount()
-            #im, has_detected, top_left, bottom_right = color_matching(frame)
-            im, has_detected, top_left, bottom_right, r = template_matching(frame, template, (0.2, 2.0, 10))
+            im, has_detected, top_left, bottom_right = color_matching(frame)
+            #im, has_detected, top_left, bottom_right, r = boost_detection(frame, "boost.xml")#template_matching(frame, template, (0.2, 2.0, 10))
             if has_detected:
                 time = cv.getTickCount() - timer
                 bbox = (top_left[0], top_left[1], bottom_right[0] - top_left[0], bottom_right[1] - top_left[1])
@@ -35,16 +36,16 @@ while True:
     elif lost_track:
         if frame is not None:
             timer = cv.getTickCount()
-            im, has_detected, top_left, bottom_right, r = template_matching(frame, template, (1 / r - 0.2 , 1/r + 0.2, 5))
-            #im, has_detected, top_left, bottom_right = color_matching(frame)
+            #im, has_detected, top_left, bottom_right, r = boost_detection(frame, "boost.xml")#template_matching(frame, template, (1 / r - 0.2 , 1/r + 0.2, 5))
+            im, has_detected, top_left, bottom_right = color_matching(frame)
             time = cv.getTickCount() - timer
             bbox = (top_left[0], top_left[1], bottom_right[0] - top_left[0], bottom_right[1] - top_left[1])
-            tracker = cv.TrackerCSRT_create()
-            ok = tracker.init(frame, bbox)
-            #cv.putText(frame, "time to detect: " + str(time), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 3)
-            frames_tracked = 0
+            #cv.putText(frame, "time to detect: " + str(time), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 3) 
             if has_detected:
+                tracker = cv.TrackerCSRT_create()
+                ok = tracker.init(frame, bbox)
                 lost_track = False
+                
     else:
         if frame is None:
             print("Error. Empty result")
@@ -59,6 +60,8 @@ while True:
                 cv.rectangle(frame, p1, p2, (255, 0, 0), 5, 1)
                 cv.putText(frame, "fps: " + str(fps), (100, 80), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 3)
                 frames_tracked = frames_tracked + 1
+                if frames_tracked > 100:
+                    has_detected = False
             else:
                 lost_track = True
                 cv.putText(frame, "Tracking failure detected", (100, 80), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 3)

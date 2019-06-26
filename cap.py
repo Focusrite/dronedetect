@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+import time
 from pypylon import pylon
 
 
@@ -70,7 +71,7 @@ if __name__ == '__main__':
     height = cap.get_param("Height")
     print("Image resolution: " + str(width) + ", " + str(height))
     cap.start()
-
+    i = 0
     while True:
         im = cap.grab()
         if im is None:
@@ -82,8 +83,14 @@ if __name__ == '__main__':
         if ch == 27 or ch == ord('q'):
             break
         if ch == ord('s'):
-            temp = cv.selectROI(im)
-            cv.imwrite('object.png',temp)
+            while i < 30:
+                im = cap.grab()
+                cv.imwrite('calibration_images2/calib_' + str(i) + '.png', im)
+                i = i + 1
+                im = cap.grab()
+                time.sleep(2)
+            #temp = cv.selectROI(im)
+            #cv.imwrite('object.png',im)
             break
 
     cap.stop()

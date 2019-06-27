@@ -86,9 +86,9 @@ if __name__ == '__main__':
         if ch == 27 or ch == ord('q'):
             break
         if ch == ord('s'):
-            while i < 30:
+            while i < 20:
                 im = cap.grab()
-                cv.imwrite('calibration_images2/calib_' + str(i) + '.png', im)
+                cv.imwrite('camera2/cam2_' + str(i) + '.png', im)
                 i = i + 1
                 im = cap.grab()
                 time.sleep(2)

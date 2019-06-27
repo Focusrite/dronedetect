@@ -23,11 +23,11 @@ def triangulate(point1, point2):
 
     # Triangulate
     points_4d = cv.triangulatePoints(P1, P2, point1, point2)
-    print(points_4d)
 
     # Scale the 4d coordinates
     points_4d = points_4d / points_4d[3, 0]
-    print(points_4d)
+
+    return points_4d[0:3, 0].reshape(3, 1)
 
 
 if __name__ == '__main__':
@@ -49,7 +49,8 @@ if __name__ == '__main__':
     print(points1.astype('float32'))
     print(points2)
 
-    triangulate(points1.astype('float32'), points2.astype('float32'))
+    coord = triangulate(points1.astype('float32'), points2.astype('float32'))
+    print(coord)
 
     while True:
         cv.imshow("camera1", im1)

@@ -22,6 +22,7 @@ cap2.start()
 kalman = cv.KalmanFilter(3, 3)
 kalman.transitionMatrix = np.eye(3).astype('float32')
 kalman.measurementMatrix = np.eye(3).astype('float32')
+kalman.measurementNoiseCov = np.array([[7.13, 0.0, 0.0], [0.0, 11.02, 0.0], [0.0, 0.0, 100.62]]).astype('float32')
 initiated = False
 initial = np.array([[0.0], [0.0], [0.0]])
 
@@ -48,6 +49,7 @@ while True:
 
         if not initiated:
             initial = pos
+            initiated = True
 
         pred = kalman.predict() + initial
         corr = kalman.correct(pos - initial) + initial
@@ -68,7 +70,8 @@ while True:
 
     ch = cv.waitKey(1)
     if ch == ord('q'):
-        break    
+        break
+
 cap1.stop()
 cap2.stop()
 cv.destroyAllWindows()

@@ -19,6 +19,12 @@ cap2 = Capture(serial2)
 cap1.start()
 cap2.start()
 
+kalman = cv.KalmanFilter(3, 3)
+kalman.transitionMatrix = np.eye(3).astype('float32')
+kalman.measurementMatrix = np.eye(3).astype('float32')
+initiated = False
+initial = np.array([[0.0], [0.0], [0.0]])
+
 while True:
     # Grab image from cameras
     frame1 = cap1.grab()
@@ -38,9 +44,16 @@ while True:
         points2 = np.array([[[(top_left2[0] + bottom_right2[0]) / 2, (top_left2[1] + bottom_right2[1]) / 2]]])
         
         # Estimate balloon position
-        pos = triangulate(points1, points2)
+        pos = triangulate(points1.astype('float32'), points2.astype('float32'))
+
+        if not initiated:
+            initial = pos
+
+        pred = kalman.predict() + initial
+        corr = kalman.correct(pos - initial) + initial
+            
         
-        cv.putText(frame1, "Estimated position : " + str(int(pos[0, 0])) + " " + str(int(pos[1, 0])) + " " + str(int(pos[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
+        cv.putText(frame1, "Estimated position : " + str(int(corr[0, 0])) + " " + str(int(corr[1, 0])) + " " + str(int(corr[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
 
     cv.rectangle(frame1, top_left1, bottom_right1, (255, 0, 0), 3)
     cv.rectangle(frame2, top_left2, bottom_right2, (255, 0, 0), 3)

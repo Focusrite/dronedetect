@@ -26,6 +26,9 @@ class Capture(object):
             print("Error: Not connected to camera, can't start grabbing.")
             return self
         self.camera.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
+        self.set_param('GainAuto', 'Continuous')
+        self.set_param('AcquisitionFrameRateEnable', True)
+        self.set_param('AcquisitionFrameRateAbs', 20.0)
         return self
 
     def grab(self):

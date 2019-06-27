@@ -11,17 +11,21 @@ from triangulate import triangulate
 serial1 = "40016577"
 serial2 = "21810700"
 
+# Create Capture objects for the cameras
 cap1 = Capture(serial1)
 cap2 = Capture(serial2)
 
+# Start cameras
 cap1.start()
 cap2.start()
 
 while True:
+    # Grab image from cameras
     frame1 = cap1.grab()
     frame2 = cap2.grab()
 
-    if frame1 is not None:
+    if frame1 is not None and frame2 is not None:
+        # Detect the balloon
         im, has_detected, top_left1, bottom_right1 = color_matching(frame1)
         im, has_detected2, top_left2, bottom_right2 = color_matching(frame2)
     else:
@@ -29,9 +33,13 @@ while True:
         break
 
     if has_detected and has_detected2:
+        # Find the center of the balloon
         points1 = np.array([[[(top_left1[0] + bottom_right1[0]) / 2, (top_left1[1] + bottom_right1[1]) / 2]]])
         points2 = np.array([[[(top_left2[0] + bottom_right2[0]) / 2, (top_left2[1] + bottom_right2[1]) / 2]]])
+        
+        # Estimate balloon position
         pos = triangulate(points1, points2)
+        
         cv.putText(frame1, "Estimated position : " + str(int(pos[0, 0])) + " " + str(int(pos[1, 0])) + " " + str(int(pos[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
 
     cv.rectangle(frame1, top_left1, bottom_right1, (255, 0, 0), 3)

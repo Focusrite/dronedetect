@@ -2,8 +2,9 @@ import numpy as np
 import math
 
 def gps_from_enu(lat_o, long_o, alt_o, enu):
-    a = 6378137
-    b = 6356752.3
+
+    a = 6378136.6 # Equatorial radius of the earth [m]
+    b = 6356752.3 # Polar radius of the earth [m]
     e2 = 1 - math.pow(b, 2) / math.pow(a, 2)
 
     lat_sin = math.sin(math.pi * lat_o / 180)

@@ -39,7 +39,8 @@ class Capture(object):
         self.set_param('GainAuto', 'Continuous')
         self.set_param('AcquisitionFrameRateEnable', True)
         self.set_param('AcquisitionFrameRateAbs', 20.0)
-        self.set_param('GevSCPD', 6000)
+        self.set_param('GevSCPD', 1700)
+        self.set_param('ExposureTimeAbs', 10000)
         return self
 
     def grab(self):

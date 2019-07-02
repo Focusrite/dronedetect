@@ -48,7 +48,7 @@ bool color_matching(Mat& img, int& x_offset, int& y_offset)
       vector<Point> c = * max_element(contours.begin(), contours.end(), contour_compare);
       Rect boundRect = boundingRect(c);
 
-      if (boundRect.area() > 50)
+      if (boundRect.area() > 500)
 	{
 	  detected = true;
 	  rectangle(img, boundRect.tl(), boundRect.br(), Scalar(255, 0, 0), 3);
@@ -67,13 +67,30 @@ int main()
 
   Mat image = imread("../../test3.png");
   //Rect boundingRect;
-  int x_offset, y_offset;
 
-  bool found = color_matching(image, x_offset, y_offset);
+  VideoCapture cap;
 
-  cout << "X-offset: " << x_offset << "Y-offset: " << y_offset << endl;
-  namedWindow("Test", WINDOW_NORMAL);
-  imshow("Test", image);
-  waitKey(0);
+  if (!cap.open(0))
+    {
+      cout << "Camera not found" << endl;
+      return 0;
+    }
+
+  for (;;)
+    {
+      Mat frame;
+      cap >> frame;
+      if (frame.empty())
+	break;
+
+      int x_offset, y_offset;
+
+      bool found = color_matching(frame, x_offset, y_offset);
+      namedWindow("TEST", WINDOW_NORMAL);
+      imshow("TEST", frame);
+
+      if (waitKey(20) == 27) break; // stop by pressing ESC
+    }
+
   return 0;
 }

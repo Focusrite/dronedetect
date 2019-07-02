@@ -1,0 +1,3 @@
+/home/user/sommarjobb/test/build-dir/CMakeFiles/edit_cache.dir
+/home/user/sommarjobb/test/build-dir/CMakeFiles/rebuild_cache.dir
+/home/user/sommarjobb/test/build-dir/CMakeFiles/Test.dir

@@ -11,7 +11,7 @@ IPADDR = '10.19.18.85'
 def connect_to_server(ipaddr):
 	try:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		print(sock)
+		#print(sock)
 	except socket.error as err:
 		print("Socket creation error")
 		return -1
@@ -47,7 +47,7 @@ def read_message(sock):
 		if buff:
 			#The message is an init message
 			if int(buff[0]) == 0:
-				msg = unpack('icc', buff[0:calcsize('icc'))
+				msg = unpack('icc', buff[0:calcsize('icc')])
 				print("Init message")
 
 			#The message is a coord message
@@ -60,17 +60,17 @@ def read_message(sock):
 
 			#The message is a start message
 			elif int(buff[0]) == 2:
-				msg = unpack('icc', buff[0:calcsize('icc'))
+				msg = unpack('icc', buff[0:calcsize('icc')])
 				print("Start message")
 
 			#The message is an abort message
 			elif int(buff[0]) == 3:
-				msg = unpack('icc', buff[0:calcsize('icc'))
+				msg = unpack('icc', buff[0:calcsize('icc')])
 				print("Abort message")
 
 			#The message is a status message
 			elif int(buff[0]) == 4:
-				msg = unpack('iccdddi', buff[0:calcsize('iccdddi'))
+				msg = unpack('iccdddi', buff[0:calcsize('iccdddi')])
 				print("Status message")
 
 			#The message is not recognized
@@ -78,13 +78,13 @@ def read_message(sock):
 				print("Message not recognized")
 
 #How to connect to the server (do once)
-sock = connect_to_server(IPADDR)
+#sock = connect_to_server(IPADDR)
 #How to tell server that you are the image processing client (do once)
-send_message(sock, 0, 'N', 0, 0, 0)
+#send_message(sock, 0, 'N', 0, 0, 0)
 #How to start the listening thread (do once)
-listening_thread = threading.Thread(target=read_message, args=(sock,), daemon=True)
-listening_thread.start()
+#listening_thread = threading.Thread(target=read_message, args=(sock,), daemon=True)
+#listening_thread.start()
 #How to send a message, this is a coordinate message to main with lon 10, lat 11 and alt 12. This should not be used more than about once per second
-send_message(sock, 2, 'M', 10, 11, 12)
+#send_message(sock, 1, 'M', 10, 11, 12)
 #How to close the listening thread, do this at the end of the code once (outside of the while loop)
-listening_thread.join()
+#listening_thread.join()

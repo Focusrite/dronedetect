@@ -8,6 +8,8 @@ from cap_test import Capture
 from triangulate import triangulate
 from SimpleTracker import SimpleTracker
 from collections import OrderedDict
+from image_processing import *
+from gps import *
 
 # Serial numbers for the two cameras
 serial1 = "40016577"
@@ -29,9 +31,18 @@ kalman.measurementNoiseCov = np.array([[7.13, 0.0, 0.0], [0.0, 11.02, 0.0], [0.0
 initiated = False
 initial = np.array([[0.0], [0.0], [0.0]])
 
+coordinates_sent = False
+
 # Trackers
 tracker1 = SimpleTracker()
 tracker2 = SimpleTracker()
+
+print(PORT)
+
+sock = connect_to_server('192.168.0.100')
+send_message(sock, 0, 'N', 0, 0, 0)
+listening_thread = threading.Thread(target = read_message, args=(sock,), daemon = True)
+listening_thread.start()
 
 while True:
     timer = cv.getTickCount()
@@ -72,13 +83,18 @@ while True:
     if points1 is not None and points2 is not None:
         # Estimate balloon position
         pos = triangulate(points1.astype('float32'), points2.astype('float32'))
+        gps_pos = gps_from_edn(np.array([[58.4035], [15.6850], [55]]), pos * 0.001).astype('float32')
 
         if not initiated:
-            initial = pos
+            initial = gps_pos.astype('float32')
             initiated = True
 
         pred = kalman.predict() + initial
-        corr = kalman.correct(pos - initial) + initial
+        corr = kalman.correct(gps_pos - initial) + initial
+
+        if not coordinates_sent:
+            send_message(sock, 1, 'M', corr[0, 0], corr[1, 0], corr[2, 0])
+            coordinates_sent = True
         
         cv.putText(frame1, "Estimated position : " + str(int(corr[0, 0])) + " " + str(int(corr[1, 0])) + " " + str(int(corr[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
 
@@ -106,6 +122,7 @@ while True:
 
 cap1.stop()
 cap2.stop()
+#listening_thread.join()
 cv.destroyAllWindows()
                 
         

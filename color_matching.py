@@ -37,13 +37,17 @@ def color_matching(img):
 
         # Find the smallest enclosing circle
         ((x, y), radius) = cv.minEnclosingCircle(c)
-        M = cv.moments(c)
-        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        bbox = cv.boundingRect(c)
+        #M = cv.moments(c)
+        #center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
         if radius > 50:
             found = True
-            cv.circle(img, (int(x), int(y)), int(radius), (0, 255, 255), 5)
-            
+            cv.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 3)
+            cv.rectangle(img, (bbox[0], bbox[0] + bbox[2]), (bbox[1], bbox[1] + bbox[3]), (0, 255, 0), 3)
+            #cv.circle(img, (int(x), int(y)), int(radius), (0, 255, 255), 5)
+            #print(bbox[0], bbox[1], bbox[2], bbox[3])
+    #return img, found, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3])        
     return img, found, (int(x) - int(radius), int(y) - int(radius)),( int(x) + int(radius), int(y) + int(radius))   
 
 if __name__ == '__main__':
@@ -52,7 +56,7 @@ if __name__ == '__main__':
     
     while True:
         cv.namedWindow('orb',cv.WINDOW_NORMAL)
-        cv.imshow('orb', img)
+        cv.imshow('orb', img[0])
         ch = cv.waitKey(1)
         if ch == ord('q'):
             break

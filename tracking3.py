@@ -46,7 +46,7 @@ listening_thread.start()
 
 # Angle that indicates the direction that camera1 points
 # NORTH = 0, WEST = pi/2, SOUTH = pi, EAST = -pi/2
-angle = 0
+angle = 12.0 / 180.0 * math.pi
 
 while True:
     timer = cv.getTickCount()
@@ -86,7 +86,7 @@ while True:
 
     if points1 is not None and points2 is not None:
         # Estimate balloon position
-        pos = triangulate(points1.astype('float32'), points2.astype('float32'), from_file=False, angle = - math.pi / 9)
+        pos = triangulate(points1.astype('float32'), points2.astype('float32'), from_file=False, angle = - math.pi / 6, theta = angle)
         pos = edn_from_camera(pos, angle).astype('float32')
         gps_pos = pos#gps_from_edn(np.array([[58.4035], [15.6850], [55]]), pos * 0.001).astype('float32')
 

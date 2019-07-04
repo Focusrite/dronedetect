@@ -60,5 +60,15 @@ def gps_from_edn(enu_origin, edn):
     lat = lat * 180 / math.pi
 
     return np.array([[lat], [lon], [alt]])
+
+# Function that transforms the camera coordinates to EDN coordinates
+# The input angle should indicate how camera1 points
+# NORTH = 0, WEST = pi/2, SOUTH = pi, EAST = -pi/2
+def edn_from_camera(camera_coords, angle):
+    cos = math.cos(-angle)
+    sin = math.sin(-angle)
+    R = np.array([[cos, 0, sin], [0, 1, 0], [-sin, 0, cos]])
+
+    return np.matmul(R, camera_coords)
     
 gps_from_edn(np.array([[55], [5], [200]]), np.array([[0], [-100], [0]]))    

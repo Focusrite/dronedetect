@@ -2,6 +2,7 @@ import cv2 as cv
 import numpy as np
 import threading
 import queue
+import math
 from pypylon import pylon
 from color_matching import color_matching
 from cap_test import Capture
@@ -37,12 +38,15 @@ coordinates_sent = False
 tracker1 = SimpleTracker()
 tracker2 = SimpleTracker()
 
-print(PORT)
-
+# Set up connection to server
 sock = connect_to_server('192.168.0.100')
 send_message(sock, 0, 'N', 0, 0, 0)
 listening_thread = threading.Thread(target = read_message, args=(sock,), daemon = True)
 listening_thread.start()
+
+# Angle that indicates the direction that camera1 points
+# NORTH = 0, WEST = pi/2, SOUTH = pi, EAST = -pi/2
+angle = 0
 
 while True:
     timer = cv.getTickCount()
@@ -83,7 +87,8 @@ while True:
     if points1 is not None and points2 is not None:
         # Estimate balloon position
         pos = triangulate(points1.astype('float32'), points2.astype('float32'))
-        gps_pos = gps_from_edn(np.array([[58.4035], [15.6850], [55]]), pos * 0.001).astype('float32')
+        pos = edn_from_camera(pos, angle).astype('float32')
+        gps_pos = pos#gps_from_edn(np.array([[58.4035], [15.6850], [55]]), pos * 0.001).astype('float32')
 
         if not initiated:
             initial = gps_pos.astype('float32')

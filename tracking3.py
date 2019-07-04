@@ -86,7 +86,7 @@ while True:
 
     if points1 is not None and points2 is not None:
         # Estimate balloon position
-        pos = triangulate(points1.astype('float32'), points2.astype('float32'))
+        pos = triangulate(points1.astype('float32'), points2.astype('float32'), from_file=False, angle = - math.pi / 9)
         pos = edn_from_camera(pos, angle).astype('float32')
         gps_pos = pos#gps_from_edn(np.array([[58.4035], [15.6850], [55]]), pos * 0.001).astype('float32')
 

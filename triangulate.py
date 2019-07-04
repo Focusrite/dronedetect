@@ -1,9 +1,10 @@
 import cv2 as cv
 import numpy as np
-from color_matching import color_matching
+import math
+#from color_matching import color_matching
 
 # Function that calculates the real world coordinates from image points
-def triangulate(point1, point2):
+def triangulate(point1, point2, from_file=True, angle=0.0):
 
     # Read camera matrices, R and t
     fs1 = cv.FileStorage("camera1.xml", cv.FILE_STORAGE_READ)
@@ -16,6 +17,10 @@ def triangulate(point1, point2):
     fs1.release()
     fs2.release()
     fs3.release()
+    if not from_file:
+        #t_1to2 = np.array([[400.0], [-185.0], [64.0]])
+        R_1to2 = np.array([[math.cos(angle), 0, -math.sin(angle)],
+                           [0, 1, 0], [math.sin(angle), 0, math.cos(angle)]]).T
 
     # Calculate projection matrices
     P1 = np.matmul(c_matrix1, np.c_[np.eye(3), np.zeros(3)])
@@ -28,7 +33,6 @@ def triangulate(point1, point2):
     points_4d = points_4d / points_4d[3, 0]
 
     return points_4d[0:3, 0].reshape(3, 1)
-
 
 if __name__ == '__main__':
     img1 = cv.imread("test_camera1.png")

@@ -1,5 +1,40 @@
 import cv2 as cv
 import numpy as np
+import math
+
+# Checks if a matrix is a valid rotation matrix.
+def isRotationMatrix(R) :
+    Rt = np.transpose(R)
+    shouldBeIdentity = np.dot(Rt, R)
+    I = np.identity(3, dtype = R.dtype)
+    n = np.linalg.norm(I - shouldBeIdentity)
+    return n < 1e-6
+ 
+ 
+# Calculates rotation matrix to euler angles
+# The result is the same as MATLAB except the order
+# of the euler angles ( x and z are swapped ).
+def rotationMatrixToEulerAngles(R) :
+ 
+    assert(isRotationMatrix(R))
+     
+    sy = math.sqrt(R[0,0] * R[0,0] +  R[1,0] * R[1,0])
+     
+    singular = sy < 1e-6
+ 
+    if  not singular :
+        x = math.atan2(R[2,1] , R[2,2])
+        y = math.atan2(-R[2,0], sy)
+        z = math.atan2(R[1,0], R[0,0])
+    else :
+        x = math.atan2(-R[1,2], R[1,1])
+        y = math.atan2(-R[2,0], sy)
+        z = 0
+
+    x = x * 180 / math.pi
+    y = y * 180 / math.pi
+    z = z * 180 / math.pi
+    return np.array([x, y, z])
 
 # Function that calculates R_1to2 and t_1to2 and saves them to r_and_t.xml
 # The camera matrices and distortion coefficients have to be calculated
@@ -18,6 +53,8 @@ def find_r_and_t(path1, path2):
     found1, corners1 = cv.findChessboardCorners(img1, (7, 9), None)
     found2, corners2 = cv.findChessboardCorners(img2, (7, 9), None)
 
+    print (found1)
+    print(found2) 
     # Read camera matrices and distortion coefficients from file
     fs1 = cv.FileStorage("camera1.xml", cv.FILE_STORAGE_READ)
     fs2 = cv.FileStorage("camera2.xml", cv.FILE_STORAGE_READ)
@@ -28,13 +65,9 @@ def find_r_and_t(path1, path2):
     fs1.release()
     fs2.release()
 
-    # Undistort if needed
-    #corners1 = cv.undistort(corners1, c_matrix1, dist1)
-    #corners2 = cv.undistort(corners2, c_matrix2, dist2)
-
     # Calculate the rvecs and tvecs
-    ret1, rvec1, tvec1 = cv.solvePnP(objp, corners1, c_matrix1, dist1)
-    ret2, rvec2, tvec2 = cv.solvePnP(objp, corners2, c_matrix2, dist2)
+    ret1, rvec1, tvec1, inliers = cv.solvePnPRansac(objp, corners1, c_matrix1, dist1, reprojectionError=2.0)#, flags = cv.SOLVEPNP_AP3P)
+    ret2, rvec2, tvec2, inliers = cv.solvePnPRansac(objp, corners2, c_matrix2, dist2, reprojectionError=2.0)#, flags = cv.SOLVEPNP_AP3P)
 
     # Calculate rotation matrices from rvecs
     R1, _ = cv.Rodrigues(rvec1)
@@ -55,10 +88,12 @@ def find_r_and_t(path1, path2):
     fs.write("R", R_1to2)
     print("write t\n", t_1to2)
     fs.write("t", t_1to2)
-    fs.release()    
+    fs.release()
+
+    print(rotationMatrixToEulerAngles(R_1to2))
     
 if __name__ == '__main__':
-    path1 = "test_camera1.png"
-    path2 = "image_camera2_test.png"
+    path1 = "chess_cam1.png"
+    path2 = "chess_cam2.png"
 
     find_r_and_t(path1, path2)

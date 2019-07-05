@@ -38,12 +38,12 @@ if __name__ == "__main__":
     
     cmd = [
         os.path.join(settings.OPENCV_BIN_DIR, "opencv_createsamples"),
-        "-vec " + os.path.abspath(args["--output-file"]),
-        "-info " + os.path.abspath(args["--positives"]),
-        "-bg " + os.path.abspath(args["--negatives"]),
-        "-num " + str(args["--num"]),
-        "-w " + args["--width"],
-        "-h " + args["--height"],
+        "-vec", os.path.abspath(args["--output-file"]),
+        "-info", os.path.abspath(args["--positives"]),
+        "-bg", os.path.abspath(args["--negatives"]),
+        "-num", str(args["--num"]),
+        "-w", args["--width"],
+        "-h", args["--height"],
         "-show" if args["--show"] else "",
     ]
     if dry:

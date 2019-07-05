@@ -80,11 +80,6 @@ again by calling `annotate.py`.
 >> python annotate.py
 ```
 
-Detta fungerar inte, men följande fungerar:
-
-```bash
->> opencv_annotation -annotations annotations.txt -images pos_images
-```
 
 ## `create_samples.py`
 
@@ -92,11 +87,6 @@ This step prepares the binary data from the positive samples needed for `opencv_
 
 ```bash
 >> python create_samples.py
-```
-
-Fungerar inte. Testa istället:
-```bash
->> opencv_createsamples -vec vec.bin -info annotations.txt -bg negatives.txt -w 24 -h 24
 ```
 
 ## `train.py`

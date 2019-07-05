@@ -22,8 +22,9 @@ def triangulate(point1, point2, from_file=True, angle=0.0, theta=0.0):
     if not from_file:
         R = np.array([[math.cos(theta), 0, -math.sin(theta)],
                       [0, 1, 0], [math.sin(theta), 0, math.cos(theta)]])
+        t_1to2 = np.array([[450.0], [1.0], [1.0]])
         t_1to2 = np.matmul(R, t_1to2)
-        #np.array([[393.0], [-108.6], [72.5]])
+       
         R_1to2 = np.array([[math.cos(angle), 0, -math.sin(angle)],
                            [0, 1, 0], [math.sin(angle), 0, math.cos(angle)]]).T
 

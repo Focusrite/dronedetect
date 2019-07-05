@@ -80,12 +80,23 @@ again by calling `annotate.py`.
 >> python annotate.py
 ```
 
+Detta fungerar inte, men följande fungerar:
+
+```bash
+>> opencv_annotation -annotations annotations.txt -images pos_images
+```
+
 ## `create_samples.py`
 
 This step prepares the binary data from the positive samples needed for `opencv_traincascade`.
 
 ```bash
 >> python create_samples.py
+```
+
+Fungerar inte. Testa istället:
+```bash
+>> opencv_createsamples -vec vec.bin -info annotations.txt -bg negatives.txt -w 24 -h 24
 ```
 
 ## `train.py`
@@ -97,6 +108,8 @@ at, so you can always add more stages later if needed.
 ```bash
 >> python train.py
 ```
+
+Fungerar!
 
 If the number of images is too low or some images are too similar, then the classifier may fail early. In that case,
 run `train.py` with the `--dry-run` option, copy the command that would have been run, and specify that a fewer

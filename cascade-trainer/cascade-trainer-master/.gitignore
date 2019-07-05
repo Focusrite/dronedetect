@@ -1,0 +1,16 @@
+# My virtual environment
+trainer_env
+
+# Project dirs
+secrets
+
+# Default image dirs
+neg_images
+pos_images
+unsorted_images
+
+test_set
+classifier
+example_classifier
+
+*.pyc

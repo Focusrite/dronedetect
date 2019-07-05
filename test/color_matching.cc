@@ -12,9 +12,10 @@ static bool contour_compare(vector<Point> contour1, vector<Point> contour2)
 }
 
 /*
- * Returns true if a red area of sufficiently large size is detected.
- * Calculates the offset in pixels from the image center for the
- * detected red area center.
+ * Function for detecting a red balloon in an image by finding red areas.
+ * Returns a bool that indicates if there was a match or not.
+ * The function also calculates the balloon's offset from the image center
+ * and stores them in x_offset and y_offset
  */
 bool color_matching(Mat& img, int& x_offset, int& y_offset)
 {
@@ -48,9 +49,11 @@ bool color_matching(Mat& img, int& x_offset, int& y_offset)
       vector<Point> c = * max_element(contours.begin(), contours.end(), contour_compare);
       Rect boundRect = boundingRect(c);
 
-      if (boundRect.area() > 500)
+      if (boundRect.area() > 500) // Maybe change the area?
 	{
 	  detected = true;
+
+	  // Draw a rectangle around the found contour
 	  rectangle(img, boundRect.tl(), boundRect.br(), Scalar(255, 0, 0), 3);
 
 	  // Find the offset
@@ -63,13 +66,10 @@ bool color_matching(Mat& img, int& x_offset, int& y_offset)
 }
 int main()
 {
-  std::cout << "TESTING" << std::endl;
-
-  Mat image = imread("../../test3.png");
-  //Rect boundingRect;
-
+  // Create a VideoCapture instance
   VideoCapture cap;
 
+  // Check that camera is found
   if (!cap.open(0))
     {
       cout << "Camera not found" << endl;
@@ -79,13 +79,18 @@ int main()
   for (;;)
     {
       Mat frame;
-      cap >> frame;
+      cap >> frame; // Read frame from camera
+      
       if (frame.empty())
 	break;
 
+      // Create ints to store the offsets
       int x_offset, y_offset;
 
+      // Perform color_matching
       bool found = color_matching(frame, x_offset, y_offset);
+
+      // Show result
       namedWindow("TEST", WINDOW_NORMAL);
       imshow("TEST", frame);
 

@@ -38,10 +38,10 @@ if __name__ == "__main__":
         neg = len(list(f))
     
     if args["<stages>"] is None:
-        args["<stages>"] = "5"
-    
+        args["<stages>"] = "25"
+    print(pos, neg)
     cmd = [
-        os.path.join("", "opencv_traincascade"),
+        os.path.join('', "opencv_traincascade"),
         "-data " + os.path.abspath(args["--output-path"]),
         "-vec " + os.path.abspath(args["--vector"]),
         "-bg " + os.path.abspath(args["--negatives"]),

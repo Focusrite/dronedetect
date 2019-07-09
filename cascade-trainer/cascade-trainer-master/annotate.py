@@ -84,7 +84,7 @@ def sort_images(dir, pos_dest, neg_dest, dry=False):
 
 def annotate(dir, output_file, dry=False):
     cmd = [
-        os.path.join('', 'opencv_annotation'),
+        os.path.join('/usr/bin/', 'opencv_annotation'),
         '-annotations' + os.path.abspath(output_file),
         '-images' + dir,
     ]

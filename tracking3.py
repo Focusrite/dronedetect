@@ -46,7 +46,7 @@ listening_thread.start()
 
 # Angle that indicates the direction that camera1 points
 # NORTH = 0, WEST = pi/2, SOUTH = pi, EAST = -pi/2
-angle = 12.0 / 180.0 * math.pi
+angle = 0
 
 while True:
     timer = cv.getTickCount()
@@ -85,24 +85,32 @@ while True:
         points2 = np.array([[[obj[0][1][0], obj[0][1][1]]]])
 
     if points1 is not None and points2 is not None:
-        # Estimate balloon position
-        pos = triangulate(points1.astype('float32'), points2.astype('float32'), from_file=False, angle = - math.pi / 6, theta = angle)
+        # Estimate balloon position relative to camera (angle is the angle between the two cameras)
+        pos = triangulate(points1.astype('float32'), points2.astype('float32'), from_file=False, angle = - math.pi / 9, theta = angle)
+
+        # Convert to EDN coordinates
         pos = edn_from_camera(pos, angle).astype('float32')
+
+        # Convert to gps position (uncomment)
         gps_pos = pos#gps_from_edn(np.array([[58.4035], [15.6850], [55]]), pos * 0.001).astype('float32')
 
+        # Start the kalman filter if this was the first measurement
         if not initiated:
             initial = gps_pos.astype('float32')
             initiated = True
 
+        # Update kalman filter
         pred = kalman.predict() + initial
         corr = kalman.correct(gps_pos - initial) + initial
 
+        # Send to server (change this so we do it more than once!)
         if not coordinates_sent:
             send_message(sock, 1, 'M', corr[0, 0], corr[1, 0], corr[2, 0])
             coordinates_sent = True
         
         cv.putText(frame1, "Estimated position : " + str(int(corr[0, 0])) + " " + str(int(corr[1, 0])) + " " + str(int(corr[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
 
+        # Draw rectangles around the found balloons
         if has_detected:
             cv.rectangle(frame1, top_left1, bottom_right1, (255, 0, 0), 3)
 
@@ -110,13 +118,12 @@ while True:
             cv.rectangle(frame2, top_left2, bottom_right2, (255, 0, 0), 3)
 
 
+    # Show frames in windows
     if frame1 is not None:
         cv.namedWindow('camera1', cv.WINDOW_NORMAL)
         cv.imshow('camera1', frame1)
     if frame2 is not None:
         cv.namedWindow('camera2', cv.WINDOW_NORMAL)
-
-
         time = cv.getTickCount() - timer
         cv.putText(frame2, "time: " + str(time / cv.getTickFrequency()), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 3)
         cv.imshow('camera2', frame2)

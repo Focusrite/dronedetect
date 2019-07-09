@@ -84,14 +84,14 @@ def sort_images(dir, pos_dest, neg_dest, dry=False):
 
 def annotate(dir, output_file, dry=False):
     cmd = [
-        os.path.join('/usr/bin/', 'opencv_annotation'),
-        '-annotations' + os.path.abspath(output_file),
-        '-images' + dir,
+        os.path.join(settings.OPENCV_BIN_DIR, 'opencv_annotation'),
+        '-annotations', os.path.abspath(output_file),
+        '-images', dir,
     ]
     if dry:
         print("Would call subprocess '{}'".format(" ".join(cmd)))
     else:
-        subprocess.call(cmd, shell=True)
+        subprocess.call(cmd)
 
 def negative_annotate(dir, output_file, dry=False):
     if dry:

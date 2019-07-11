@@ -74,8 +74,10 @@ def find_r_and_t(img1, img2, file_name="r_and_t.xml", cam1="camera1.xml", cam2="
     print("tvec2\n", tvec2)
 
     # Calculate rotation matrix and translation vector from camera 1 to 2
-    R_1to2 = np.matmul(R2, np.transpose(R1))
-    t_1to2 = np.matmul(R2, (-1 * np.matmul(np.transpose(R1), tvec1))) + tvec2
+    #R_1to2 = np.matmul(R2, np.transpose(R1))
+    #t_1to2 = np.matmul(R2, (-1 * np.matmul(np.transpose(R1), tvec1))) + tvec2
+    R_1to2 = R2@R1.T
+    t_1to2 = tvec2 -R_1to2@tvec1
 
     # Save R and t to file
     fs = cv.FileStorage(file_name, cv.FILE_STORAGE_WRITE)

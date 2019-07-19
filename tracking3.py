@@ -86,7 +86,7 @@ while True:
 
     if points1 is not None and points2 is not None:
         # Estimate balloon position relative to camera (angle is the angle between the two cameras)
-        pos = triangulate(points1.astype('float32'), points2.astype('float32'), from_file=False, angle = - math.pi / 9, theta = angle)
+        pos = triangulate(points1.astype('float32'), points2.astype('float32'), from_file=False, angle = 0, theta = 0)# angle = -math.pi/9, theta=angle
 
         # Convert to EDN coordinates
         pos = edn_from_camera(pos, angle).astype('float32')

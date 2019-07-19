@@ -41,7 +41,7 @@ def color_matching(img):
         #M = cv.moments(c)
         #center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
-        if radius > 50:
+        if radius > 25:
             found = True
             cv.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 3)
             cv.rectangle(img, (bbox[0], bbox[0] + bbox[2]), (bbox[1], bbox[1] + bbox[3]), (0, 255, 0), 3)

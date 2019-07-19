@@ -80,11 +80,11 @@ while True:
     thresh1 = cv.threshold(frameDiff, 25, 255, cv.THRESH_BINARY)[1]
 
     thresh1 = cv.dilate(thresh1, None, iterations=2)
-    cnts = cv.findContours(thresh1.copy(), cv.RETR_EXTERNAL,cv.CV_CHAIN_APPROX_SIMPLE)
+    cnts = cv.findContours(thresh1.copy(), cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
 
     for c in cnts:
-        if cv.contourArea(c) < 10:
+        if cv.contourArea(c) < 30:
             continue
         (x,y,w,h) = cv.boundingRect(c)
         cv.rectangle(frame1, (x,y),(x+w,y+h),(0,255,0),2)
@@ -107,51 +107,7 @@ while True:
 
 cap1.stop()
 cap2.stop()
-#listening_thread.join()
 cv.destroyAllWindows()
-"""
-        # Find the center of the balloon
-    if bool(objects1):
-        obj = list(objects1.items())
-        points1 = np.array([[[obj[0][1][0], obj[0][1][1]]]])
-    if bool(objects2):
-        obj = list(objects2.items())
-        points2 = np.array([[[obj[0][1][0], obj[0][1][1]]]])
-
-    if points1 is not None and points2 is not None:
-        # Estimate balloon position relative to camera (angle is the angle between the two cameras)
-        pos = triangulate(points1.astype('float32'), points2.astype('float32'), from_file=False, angle = - math.pi / 9, theta = angle)
-
-        # Convert to EDN coordinates
-        pos = edn_from_camera(pos, angle).astype('float32')
-
-        # Convert to gps position (uncomment)
-        gps_pos = pos#gps_from_edn(np.array([[58.4035], [15.6850], [55]]), pos * 0.001).astype('float32')
-
-        # Start the kalman filter if this was the first measurement
-        if not initiated:
-            initial = gps_pos.astype('float32')
-            initiated = True
-
-        # Update kalman filter
-        pred = kalman.predict() + initial
-        corr = kalman.correct(gps_pos - initial) + initial
-
-        # Send to server (change this so we do it more than once!)
-        if not coordinates_sent:
-            send_message(sock, 1, 'M', corr[0, 0], corr[1, 0], corr[2, 0])
-            coordinates_sent = True
-        
-        cv.putText(frame1, "Estimated position : " + str(int(corr[0, 0])) + " " + str(int(corr[1, 0])) + " " + str(int(corr[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
-
-        # Draw rectangles around the found balloons
-        if has_detected:
-            cv.rectangle(frame1, top_left1, bottom_right1, (255, 0, 0), 3)
-
-        if has_detected2:    
-            cv.rectangle(frame2, top_left2, bottom_right2, (255, 0, 0), 3)
-"""
-# Show frames in windows
 
                 
         

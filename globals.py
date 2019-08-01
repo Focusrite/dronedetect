@@ -1,9 +1,14 @@
 def initialize():
-    global started
+    global image_processing_begin
+    global image_processing_send
+    global image_processing_abort
     global latitude
     global longitude
     global altitude
-    latitude = 58.4035
-    longitude = 15.6850
-    altitude = 55
-    started = False
+    global abort
+    latitude = 0
+    longitude = 0
+    altitude = 0
+    image_processing_begin = False
+    image_processing_send = True
+    image_processing_abort = False

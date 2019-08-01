@@ -41,13 +41,11 @@ def tracking():
     initiated = False
     initial = np.array([[0.0], [0.0], [0.0]])
 
-    coordinates_sent = False
-
     # Trackers
     tracker1 = SimpleTracker()
     tracker2 = SimpleTracker()
 
-    # Set up connection to server
+    #Set up connection to server
     sock = connect_to_server('192.168.1.130')#10.19.17.203')#'192.168.0.100')
     send_message(sock, 0, 'N', 0, 0, 0)
     listening_thread = threading.Thread(target = read_message, args=(sock,), daemon = True)
@@ -58,88 +56,97 @@ def tracking():
     angle = 0
 
     while True:
-        timer = cv.getTickCount()
-    
-        points1 = None
-        points2 = None
-    
-        # Grab image from cameras
-        frame1 = cap1.grab()
-        frame2 = cap2.grab()
-
-        if frame1 is not None and frame2 is not None:
-            # Detect the balloon
-            im, has_detected, top_left1, bottom_right1 = color_matching(frame1)        
-            im, has_detected2, top_left2, bottom_right2 = color_matching(frame2)
-
-            # Update trackers
-            if has_detected:
-                objects1 = tracker1.update([(top_left1[0], top_left1[1], bottom_right1[0], bottom_right1[1])])
-            else:
-                objects1 = tracker1.update([])
-            if has_detected2:
-                objects2 = tracker2.update([(top_left2[0], top_left2[1], bottom_right2[0], bottom_right2[1])])
-            else:
-                objects2 = tracker2.update([])
-        else:
-            print("Error. empty frame\n")
+        if globals.image_processing_abort:
             break
 
-        # Find the center of the balloon
-        if bool(objects1):
-            obj = list(objects1.items())
-            points1 = np.array([[[obj[0][1][0], obj[0][1][1]]]])
-        if bool(objects2):
-            obj = list(objects2.items())
-            points2 = np.array([[[obj[0][1][0], obj[0][1][1]]]])
+        if globals.image_processing_begin:
+            timer = cv.getTickCount()
+    
+            points1 = None
+            points2 = None
+    
+            # Grab image from cameras
+            frame1 = cap1.grab()
+            frame2 = cap2.grab()
 
-        if points1 is not None and points2 is not None:
-            # Estimate balloon position relative to camera
-            # (angle is the angle between the two cameras)
-            pos = triangulator.triangulate(points1.astype('float32'), points2.astype('float32'))#, from_file=False, angle = 0, theta = 0)# angle = -math.pi/9, theta=angle
+            if frame1 is not None and frame2 is not None:
+                # Detect the balloon
+                im, has_detected, top_left1, bottom_right1 = color_matching(frame1)        
+                im, has_detected2, top_left2, bottom_right2 = color_matching(frame2)
+
+                # Update trackers
+                if has_detected:
+                    objects1 = tracker1.update([(top_left1[0], top_left1[1], bottom_right1[0], bottom_right1[1])])
+                else:
+                    objects1 = tracker1.update([])
+                if has_detected2:
+                    objects2 = tracker2.update([(top_left2[0], top_left2[1], bottom_right2[0], bottom_right2[1])])
+                else:
+                    objects2 = tracker2.update([])
+            else:
+                print("Error. empty frame\n")
+                break
+
+            # Find the center of the balloon
+            if bool(objects1):
+                obj = list(objects1.items())
+                points1 = np.array([[[obj[0][1][0], obj[0][1][1]]]])
+            if bool(objects2):
+                obj = list(objects2.items())
+                points2 = np.array([[[obj[0][1][0], obj[0][1][1]]]])
+
+            if points1 is not None and points2 is not None:
+                # Estimate balloon position relative to camera
+                # (angle is the angle between the two cameras)
+                pos = triangulator.triangulate(points1.astype('float32'), points2.astype('float32'))#, from_file=False, angle = 0, theta = 0)# angle = -math.pi/9, theta=angle
             
-            # Convert to EDN coordinates
-            pos = edn_from_camera(pos, angle).astype('float32')
+                # Convert to EDN coordinates
+                pos = edn_from_camera(pos, angle).astype('float32')
 
-            # Convert to gps position (uncomment)
-            gps_pos = pos#gps_from_edn(np.array([[58.4035], [15.6850], [55]]), pos * 0.001).astype('float32')
+                # Convert to gps position
+                # We must multiply pos with 0.001 since pos is in mm and gps_from_edn expects m
+                #gps_pos = gps_from_edn(np.array([[58.4035], [15.6850], [55]]), pos * 0.001).astype('float32')
+                gps_pos = gps_from_edn(np.array([[globals.latitude], [globals.longitude], [globals.altitude]]), pos * 0.001).astype('float32')
 
-            # Start the kalman filter if this was the first measurement
-            if not initiated:
-                initial = gps_pos.astype('float32')
-                initiated = True
+                # Start the kalman filter if this was the first measurement
+                if not initiated:
+                    initial = gps_pos.astype('float32')
+                    initiated = True
 
-            # Update kalman filter
-            pred = kalman.predict() + initial
-            corr = kalman.correct(gps_pos - initial) + initial
+                # Update kalman filter
+                pred = kalman.predict() + initial
+                corr = kalman.correct(gps_pos - initial) + initial
 
-            if not coordinates_sent:    
-                send_message(sock, 1, 'M', corr[0, 0], corr[1, 0], corr[2, 0])
-                coordinates_sent = True
+                if globals.image_processing_send:
+                    print("Lat: ", globals.latitude)
+                    print("Long: ", globals.longitude)
+                    print("Alt: ", globals.altitude)
+                    send_message(sock, 1, 'M', corr[0, 0], corr[1, 0], corr[2, 0])
+                    globals.image_processing_send = False
         
-            cv.putText(frame1, "Estimated position : " + str(int(corr[0, 0])) + " " + str(int(corr[1, 0])) + " " + str(int(corr[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
+                cv.putText(frame1, "Estimated position : " + str(int(corr[0, 0])) + " " + str(int(corr[1, 0])) + " " + str(int(corr[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
 
-            # Draw rectangles around the found balloons
-            if has_detected:
-                cv.rectangle(frame1, top_left1, bottom_right1, (255, 0, 0), 3)
+                # Draw rectangles around the found balloons
+                if has_detected:
+                    cv.rectangle(frame1, top_left1, bottom_right1, (255, 0, 0), 3)
 
-            if has_detected2:    
-                cv.rectangle(frame2, top_left2, bottom_right2, (255, 0, 0), 3)
+                if has_detected2:    
+                    cv.rectangle(frame2, top_left2, bottom_right2, (255, 0, 0), 3)
 
 
-        # Show frames in windows
-        if frame1 is not None:
-            cv.namedWindow('camera1', cv.WINDOW_NORMAL)
-            cv.imshow('camera1', frame1)
-        if frame2 is not None:
-            cv.namedWindow('camera2', cv.WINDOW_NORMAL)
-            time = cv.getTickCount() - timer
-            cv.putText(frame2, "time: " + str(time / cv.getTickFrequency()), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 3)
-            cv.imshow('camera2', frame2)
+                # Show frames in windows
+                if frame1 is not None:
+                    cv.namedWindow('camera1', cv.WINDOW_NORMAL)
+                    cv.imshow('camera1', frame1)
+                if frame2 is not None:
+                    cv.namedWindow('camera2', cv.WINDOW_NORMAL)
+                    time = cv.getTickCount() - timer
+                    cv.putText(frame2, "time: " + str(time / cv.getTickFrequency()), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 3)
+                    cv.imshow('camera2', frame2)
     
-        ch = cv.waitKey(1)
-        if ch == ord('q'):
-            break
+                ch = cv.waitKey(1)
+                if ch == ord('q'):
+                    break
 
     cap1.stop()
     cap2.stop()

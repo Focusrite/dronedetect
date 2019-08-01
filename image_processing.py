@@ -56,11 +56,15 @@ def read_message(sock):
 			#The message is a coord message
 			elif int(buff[0]) == 1:
 				msg = unpack('iccddd', buff[0:calcsize('iccddd')])
-				lon = msg[3] #Is a float
-				lat = msg[4] #Is a float
+				lat = msg[3] #Is a float
+				lon = msg[4] #Is a float
 				alt = msg[5] #Is a float
-				globals.started = True#print("Coord message, lon: " + str(lon))
-				#print("Socket: ",started)
+				print("Coord message, lon: " + str(lon))
+				globals.image_processing_begin = True
+				globals.image_processing_send = True
+				globals.latitude = lat
+				globals.longitude = lon
+				globals.altitude = alt
 
 			#The message is a start message
 			elif int(buff[0]) == 2:
@@ -71,7 +75,7 @@ def read_message(sock):
 			#The message is an abort message
 			elif int(buff[0]) == 3:
 				msg = unpack('icc', buff[0:calcsize('icc')])
-                                #global running = False
+				globals.image_processing_abort = True
 				print("Abort message")
 
 			#The message is a status message

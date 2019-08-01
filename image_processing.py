@@ -3,15 +3,16 @@
 import socket
 from struct import *
 import threading
+import globals
 
-PORT = 8080
+PORT = 8085
 IPADDR = '10.19.18.85'
 
 #Function connects up to server and sets sock
 def connect_to_server(ipaddr):
 	try:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		#print(sock)
+		print(sock)
 	except socket.error as err:
 		print("Socket creation error")
 		return -1
@@ -19,6 +20,7 @@ def connect_to_server(ipaddr):
 	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 	try:
+		print(sock)
 		sock.connect((ipaddr, PORT))
 	except socket.error as err:
 		print("Error connecting to server")
@@ -42,6 +44,7 @@ def send_message(sock, typ, receiver, lon, lat, alt):
 
 #Function constantly reads from socket
 def read_message(sock):
+	#global started
 	while True:
 		buff = sock.recv(1024)
 		if buff:
@@ -56,16 +59,19 @@ def read_message(sock):
 				lon = msg[3] #Is a float
 				lat = msg[4] #Is a float
 				alt = msg[5] #Is a float
-				print("Coord message, lon: " + str(lon))
+				globals.started = True#print("Coord message, lon: " + str(lon))
+				#print("Socket: ",started)
 
 			#The message is a start message
 			elif int(buff[0]) == 2:
 				msg = unpack('icc', buff[0:calcsize('icc')])
+                                #global started = True
 				print("Start message")
 
 			#The message is an abort message
 			elif int(buff[0]) == 3:
 				msg = unpack('icc', buff[0:calcsize('icc')])
+                                #global running = False
 				print("Abort message")
 
 			#The message is a status message

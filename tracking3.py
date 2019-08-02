@@ -59,7 +59,7 @@ def tracking():
         if globals.image_processing_abort:
             break
 
-        if True:#globals.image_processing_begin:
+        if globals.image_processing_begin:
             timer = cv.getTickCount()
     
             points1 = None

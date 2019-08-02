@@ -61,8 +61,8 @@ def find_r_and_t(img1, img2, file_name="r_and_t.xml", cam1="camera1.xml", cam2="
     fs2.release()
 
     # Calculate the rvecs and tvecs
-    ret1, rvec1, tvec1, inliers = cv.solvePnPRansac(objp, corners1, c_matrix1, dist1, reprojectionError=2.0)#, flags = cv.SOLVEPNP_AP3P)
-    ret2, rvec2, tvec2, inliers = cv.solvePnPRansac(objp, corners2, c_matrix2, dist2, reprojectionError=2.0)#, flags = cv.SOLVEPNP_AP3P)
+    ret1, rvec1, tvec1, inliers = cv.solvePnPRansac(objp, corners1, c_matrix1, dist1, reprojectionError=2.0)#, flags = cv.SOLVEPNP_ITERATIVE)
+    ret2, rvec2, tvec2, inliers = cv.solvePnPRansac(objp, corners2, c_matrix2, dist2, reprojectionError=2.0)#, flags = cv.SOLVEPNP_)
 
     # Calculate rotation matrices from rvecs
     R1, _ = cv.Rodrigues(rvec1)

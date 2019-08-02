@@ -21,7 +21,7 @@ for fname in os.listdir("calibration_images2"):
         if ret == True:
             objpoints.append(objp)
             corners2 = cv.cornerSubPix(gray,corners, (11,11), (-1,-1), criteria)
-            imgpoints.append(corners)
+            imgpoints.append(corners2)
             # Draw and display the corners
             cv.drawChessboardCorners(img, (7,9), corners2, ret)
             cv.imshow('img', img)

@@ -1,5 +1,5 @@
 # dronedetect
-Summer worker drone detect application using computer vision. This README describes how to set the project up
+Summer job project to detect and track drones. This README describes how to set the project up
 for development.
 
 ## Prerequisites
@@ -9,6 +9,7 @@ for development.
 * Basler pylon drivers. Note that these are not installed from anaconda.
 * Pypylon library, for easy interfacing with the pylon driver (requires SWIG).
 * OpenCV and OpenCV-contrib as a good place to start with algorithms.
+* pip and python pre-installed if not install them first
 
 Optional but good to have
 * Scipy

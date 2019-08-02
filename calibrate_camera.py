@@ -1,6 +1,8 @@
 """calibrate_camera.py
 
-Calibrates a camera using chessboard images.
+Calibrates a camera using chessboard images. If there are multiple cameras connected, only the first to be found will be calibrated.
+
+The resulting camera matrix and distortion coefficients are stored in the output file.
 
 Usage:
     calibrate_camera.py [--output=<file>] [--size=<mm>]
@@ -8,6 +10,7 @@ Usage:
 Options:
     --help, -h                    Print this help message.
     --output=<file>, -o <file>    [Default: camera_test.xml] The output file to send the camera parameters to.
+    --size=<mm>, -s <mm>          [Default: 20] The chessboard square size in mm.
 
 """
 
@@ -17,7 +20,7 @@ import cv2 as cv
 import docopt
 from cap import Capture
 
-def calibrate(output_file):
+def calibrate(output_file, square_size):
     print("CALIBRATING CAMERA")
     
     # termination criteria
@@ -25,7 +28,7 @@ def calibrate(output_file):
 
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ... (6,8,0)
     objp = np.zeros((7 * 9, 3), np.float32)
-    objp[:, :2] = np.mgrid[0:7, 0:9].T.reshape(-1,2)*20
+    objp[:, :2] = np.mgrid[0:7, 0:9].T.reshape(-1,2)*float(square_size)
 
     # Arrays to store object points and image points from all the images.
     objpoints = [] # 3d points in real world space
@@ -71,5 +74,6 @@ def calibrate(output_file):
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
     output_file = args["--output"]
-    
-    calibrate(output_file)
+
+    square_size = args["--size"]
+    calibrate(output_file, square_size)

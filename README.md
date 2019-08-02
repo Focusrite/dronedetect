@@ -1,5 +1,5 @@
 # dronedetect
-Summer job project to detect and track drones. This README describes how to set the project up
+Summer job project to detect and track drones using computer vision. This README describes how to set the project up
 for development.
 
 ## Prerequisites

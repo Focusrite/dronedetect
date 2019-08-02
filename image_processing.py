@@ -56,10 +56,10 @@ def read_message(sock):
 			#The message is a coord message
 			elif int(buff[0]) == 1:
 				msg = unpack('iccddd', buff[0:calcsize('iccddd')])
-				lat = msg[3] #Is a float
-				lon = msg[4] #Is a float
+				lon = msg[3] #Is a float
+				lat = msg[4] #Is a float
 				alt = msg[5] #Is a float
-				print("Coord message, lon: " + str(lon))
+				print("Coord message, lon: " + str(alt))
 				globals.image_processing_begin = True
 				globals.image_processing_send = True
 				globals.latitude = lat
@@ -69,7 +69,6 @@ def read_message(sock):
 			#The message is a start message
 			elif int(buff[0]) == 2:
 				msg = unpack('icc', buff[0:calcsize('icc')])
-                                #global started = True
 				print("Start message")
 
 			#The message is an abort message

@@ -115,7 +115,7 @@ def tracking():
                 # Convert to gps position
                 # We must multiply pos with 0.001 since pos is in mm and gps_from_edn expects m
                 #gps_pos = gps_from_edn(np.array([[58.4035], [15.6850], [55]]), pos * 0.001).astype('float32')
-                gps_pos = gps_from_edn(np.array([[globals.latitude], [globals.longitude], [globals.altitude]]), corr_pos * 0.001).astype('float64')
+                gps_pos = gps_from_edn(np.array([[globals.longitude], [globals.latitude], [globals.altitude]]), corr_pos * 0.001).astype('float64')
                 print("GPS: ",gps_pos)
 
 

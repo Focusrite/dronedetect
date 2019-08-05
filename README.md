@@ -14,6 +14,9 @@ for development.
 Optional but good to have
 * Scipy
 
+For the calibration script
+* docopt
+
 # Detailed instructions
 
 Once miniconda is installed run;
@@ -29,6 +32,7 @@ Install necessary libraries;
 `pip install opencv-contrib-python`
 `conda install -c anaconda swig`
 `conda update swig`
+`pip install docopt==0.6.2`
 
 Download and install the Basler pylon drivers.
 To install pypylon, first export PYLON_ROOT="/PATH/TO/PYLON" then run pip install in pypylon

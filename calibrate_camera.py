@@ -5,12 +5,15 @@ Calibrates a camera using chessboard images. If there are multiple cameras conne
 The resulting camera matrix and distortion coefficients are stored in the output file.
 
 Usage:
-    calibrate_camera.py [--output=<file>] [--size=<mm>]
+    calibrate_camera.py [--output=<file>] [--sqsize=<mm>]
+    calibrate_camera.py [--output=<file>] [--sqsize=<mm>] --bwidth=<sqs> --bheight=<sqs>
 
 Options:
     --help, -h                    Print this help message.
     --output=<file>, -o <file>    [Default: camera_test.xml] The output file to send the camera parameters to.
-    --size=<mm>, -s <mm>          [Default: 20] The chessboard square size in mm.
+    --sqsize=<mm>, -s <mm>        [Default: 20] The chessboard square size in mm.
+    --bwidth=<sqs>, -bw <sqs>     [Default: 7] The chessboard width in squares.
+    --bheight=<sqs>, -bh <sqs>    [Default: 9] The chessboard height in squares.
 
 """
 
@@ -20,15 +23,15 @@ import cv2 as cv
 import docopt
 from cap import Capture
 
-def calibrate(output_file, square_size):
+def calibrate(output_file, square_size, board_width, board_height):
     print("CALIBRATING CAMERA")
     
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ... (6,8,0)
-    objp = np.zeros((7 * 9, 3), np.float32)
-    objp[:, :2] = np.mgrid[0:7, 0:9].T.reshape(-1,2)*float(square_size)
+    objp = np.zeros((board_width * board_height, 3), np.float32)
+    objp[:, :2] = np.mgrid[0:board_width, 0:board_height].T.reshape(-1,2)*float(square_size)
 
     # Arrays to store object points and image points from all the images.
     objpoints = [] # 3d points in real world space
@@ -45,7 +48,7 @@ def calibrate(output_file, square_size):
         gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
         # Find the chess board corners
-        ret, corners = cv.findChessboardCorners(gray, (7,9), None)
+        ret, corners = cv.findChessboardCorners(gray, (board_width,board_height), None)
         print("Found chessboard corners")
 
         # If found, add object points, image points (after refining them)
@@ -54,7 +57,7 @@ def calibrate(output_file, square_size):
             corners2 = cv.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
             imgpoints.append(corners2)
             # Draw and display the corners
-            cv.drawChessboardCorners(img, (7, 9), corners2, ret)
+            cv.drawChessboardCorners(img, (board_width, board_height), corners2, ret)
             cv.namedWindow('img', cv.WINDOW_NORMAL)
             cv.imshow('img', img)
             cv.waitKey(500)
@@ -75,5 +78,7 @@ if __name__ == "__main__":
     args = docopt.docopt(__doc__)
     output_file = args["--output"]
 
-    square_size = args["--size"]
-    calibrate(output_file, square_size)
+    square_size = args["--sqsize"]
+    board_width = args["--bwidth"]
+    board_height = args["--bheight"]
+    calibrate(output_file, square_size, int(board_width), int(board_height))

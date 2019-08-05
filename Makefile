@@ -1,9 +1,5 @@
-# Makefile for Basler pylon sample program
+# Makefile for Detector program
 .PHONY: all clean
-
-# The program to build
-NAME       := cap
-
 
 # Installation directories for pylon
 PYLON_ROOT := /home/user/sommarjobb/pylon/pylon5
@@ -18,13 +14,6 @@ OPENCV     := `pkg-config --libs opencv`
 
 # Rules for building
 all: detector
-#all: $(NAME)
-
-$(NAME): $(NAME).o
-	$(LD) $(LDFLAGS) -o $@ $^ $(LDLIBS) $(OPENCV)
-
-#$(NAME).o: $(NAME).cc
-#	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
 detector: Detector.o cap.o Triangulator.o
 	$(LD) $(LDFLAGS) -o $@ $^ $(LDLIBS) $(OPENCV)

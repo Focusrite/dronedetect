@@ -174,7 +174,7 @@ OpenCV_3RDPARTY_LIB_DIR_OPT:PATH=/usr/share/opencv/3rdparty/lib64
 OpenCV_CONFIG_PATH:FILEPATH=/usr/share/opencv
 
 //The directory containing a CMake configuration file for OpenCV.
-OpenCV_DIR:PATH=/usr/share/opencv
+OpenCV_DIR:PATH=/home/user/sommarjobb/miniconda3/envs/Sommarjobb/share/OpenCV
 
 //Path where debug OpenCV libraries are located
 OpenCV_LIB_DIR_DBG:PATH=
@@ -320,6 +320,8 @@ CMAKE_STRIP-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//Details about finding OpenCV
+FIND_PACKAGE_MESSAGE_DETAILS_OpenCV:INTERNAL=[/home/user/sommarjobb/miniconda3/envs/Sommarjobb][v3.4.2()]
 //ADVANCED property for variable: OpenCV_3RDPARTY_LIB_DIR_DBG
 OpenCV_3RDPARTY_LIB_DIR_DBG-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: OpenCV_3RDPARTY_LIB_DIR_OPT

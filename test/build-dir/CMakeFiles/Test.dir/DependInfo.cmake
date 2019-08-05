@@ -10,7 +10,8 @@ set(CMAKE_CXX_COMPILER_ID "GNU")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "/usr/include/opencv"
+  "/home/user/sommarjobb/miniconda3/envs/Sommarjobb/include"
+  "/home/user/sommarjobb/miniconda3/envs/Sommarjobb/include/opencv"
   )
 
 # Targets to which this target links.

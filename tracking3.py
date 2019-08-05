@@ -5,15 +5,13 @@ import queue
 import math
 from pypylon import pylon
 from color_matching import color_matching
-from cap_test import Capture
-#from triangulate import triangulate
+from capture import Capture
 from SimpleTracker import SimpleTracker
 from collections import OrderedDict
 from image_processing import *
 from gps import *
 import globals
 from triangulator import Triangulator
-
 
 def tracking():
     globals.initialize()
@@ -115,8 +113,8 @@ def tracking():
                 # Convert to gps position
                 # We must multiply pos with 0.001 since pos is in mm and gps_from_edn expects m
                 #gps_pos = gps_from_edn(np.array([[58.4035], [15.6850], [55]]), pos * 0.001).astype('float32')
-                gps_pos = gps_from_edn(np.array([[globals.longitude], [globals.latitude], [globals.altitude]]), corr_pos * 0.001).astype('float64')
-                print("GPS: ",gps_pos)
+                gps_pos = gps_from_edn(np.array([[globals.latitude], [globals.longitude], [globals.altitude]]), corr_pos * 0.001).astype('float64')
+                #print("GPS: ",gps_pos)
 
 
 
@@ -124,10 +122,10 @@ def tracking():
                     print("Lat: ", globals.latitude)
                     print("Long: ", globals.longitude)
                     print("Alt: ", globals.altitude)
-                    send_message(sock, 1, 'M', gps_pos[0, 0], gps_pos[1, 0], gps_pos[2, 0])
+                    send_message(sock, 1, 'M', gps_pos[1, 0], gps_pos[0, 0], gps_pos[2, 0])
                     globals.image_processing_send = False
         
-                cv.putText(frame1, "Estimated position : " + str(int(gps_pos[0, 0])) + " " + str(int(gps_pos[1, 0])) + " " + str(int(gps_pos[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
+                #cv.putText(frame1, "Estimated position : " + str(int(gps_pos[0, 0])) + " " + str(int(gps_pos[1, 0])) + " " + str(int(gps_pos[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
 
                 # Draw rectangles around the found balloons
                 if has_detected:

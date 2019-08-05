@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 import math
-from cap_test import Capture
+from capture import Capture
 
 # Checks if a matrix is a valid rotation matrix.
 def isRotationMatrix(R) :

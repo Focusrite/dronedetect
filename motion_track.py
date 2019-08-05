@@ -26,7 +26,7 @@ import imutils
 #import math
 from pypylon import pylon
 #from color_matching import color_matching
-from cap_test import Capture
+from capture import Capture
 #from triangulate import triangulate
 #from SimpleTracker import SimpleTracker
 #from collections import OrderedDict

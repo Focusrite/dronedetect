@@ -12,7 +12,7 @@ IPADDR = '10.19.18.85'
 def connect_to_server(ipaddr):
 	try:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		#print(sock)
+		print(sock)
 	except socket.error as err:
 		print("Socket creation error")
 		return -1
@@ -43,7 +43,6 @@ def send_message(sock, typ, receiver, lon, lat, alt):
 
 #Function constantly reads from socket
 def read_message(sock):
-	#global started
 	while True:
 		buff = sock.recv(1024)
 		if buff:
@@ -58,7 +57,8 @@ def read_message(sock):
 				lon = msg[3] #Is a float
 				lat = msg[4] #Is a float
 				alt = msg[5] #Is a float
-				print("Coord message, lon: " + str(alt))
+				print("Coord message, alt: " + str(alt))
+				#Set global variables needed by main program
 				globals.image_processing_begin = True
 				globals.image_processing_send = True
 				globals.latitude = lat

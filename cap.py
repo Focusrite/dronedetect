@@ -1,7 +1,13 @@
+# cap.py
+
+# Defines the Capture class used to access a camera
+# Always accesses the first camera found
+
 import numpy as np
 import cv2 as cv
 import time
 from pypylon import pylon
+from pypylon import genicam
 
 
 class Capture(object):
@@ -17,7 +23,7 @@ class Capture(object):
             self.camera = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
             self.camera.Open()
             print("Connecting to camera:", self.camera.GetDeviceInfo().GetModelName())
-        except e:
+        except genicam.GenericException as e:
             self.camera = None
             pass
 
@@ -86,14 +92,8 @@ if __name__ == '__main__':
         if ch == 27 or ch == ord('q'):
             break
         if ch == ord('s'):
-            while i < 20:
-                im = cap.grab()
-                cv.imwrite('camera2/cam2_' + str(i) + '.png', im)
-                i = i + 1
-                im = cap.grab()
-                time.sleep(2)
-            #temp = cv.selectROI(im)
-            #cv.imwrite('object.png',im)
+            temp = cv.selectROI(im)
+            cv.imwrite('object.png',im)
             break
 
     cap.stop()

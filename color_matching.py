@@ -6,6 +6,7 @@ def color_matching(img):
     # Initialize default values
     x, y, radius = 0, 0, 0
     found = False
+    MIN_RADIUS = 8
 
     # Blur image
     img = cv.GaussianBlur(img, (5, 5), 0)
@@ -14,7 +15,7 @@ def color_matching(img):
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
 
     # Mask out the lower interva
-    lower_red = np.array([0, 130, 120])#([0, 120, 70])
+    lower_red = np.array([0, 130, 120])
     upper_red = np.array([10, 255, 255])
     mask1 = cv.inRange(hsv, lower_red, upper_red)
 
@@ -41,9 +42,9 @@ def color_matching(img):
         #M = cv.moments(c)
         #center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
-        if radius > 8:
+        if radius > MIN_RADIUS:
             found = True
-            cv.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 3)
+            #cv.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 3)
             cv.rectangle(img, (bbox[0], bbox[0] + bbox[2]), (bbox[1], bbox[1] + bbox[3]), (0, 255, 0), 3)
             #cv.circle(img, (int(x), int(y)), int(radius), (0, 255, 255), 5)
             #print(bbox[0], bbox[1], bbox[2], bbox[3])

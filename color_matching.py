@@ -1,7 +1,15 @@
+# color_matching.py
+
 import numpy as np
 import cv2 as cv
 from pypylon import pylon
 
+# Function that tries to find red areas in an image img
+# Returns img, found, top_left, bottom_right where:
+# img = the image, with a rectangle drawn around the found area
+# found = true if a red area has been found
+# top_left, bottom_right = the top left and bottom right corners
+# of the found area
 def color_matching(img):
     # Initialize default values
     x, y, radius = 0, 0, 0
@@ -14,7 +22,7 @@ def color_matching(img):
     # Change image to HSV colour space
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
 
-    # Mask out the lower interva
+    # Mask out the lower interval
     lower_red = np.array([0, 130, 120])
     upper_red = np.array([10, 255, 255])
     mask1 = cv.inRange(hsv, lower_red, upper_red)
@@ -38,29 +46,14 @@ def color_matching(img):
 
         # Find the smallest enclosing circle
         ((x, y), radius) = cv.minEnclosingCircle(c)
+        # Find the bounding rectangle
         bbox = cv.boundingRect(c)
-        #M = cv.moments(c)
-        #center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
         if radius > MIN_RADIUS:
             found = True
-            #cv.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 3)
             cv.rectangle(img, (bbox[0], bbox[0] + bbox[2]), (bbox[1], bbox[1] + bbox[3]), (0, 255, 0), 3)
-            #cv.circle(img, (int(x), int(y)), int(radius), (0, 255, 255), 5)
-            #print(bbox[0], bbox[1], bbox[2], bbox[3])
-    #return img, found, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3])        
-    return img, found, (int(x) - int(radius), int(y) - int(radius)),( int(x) + int(radius), int(y) + int(radius))   
+    return img, found, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3])        
+    #return img, found, (int(x) - int(radius), int(y) - int(radius)),( int(x) + int(radius), int(y) + int(radius))   
 
-if __name__ == '__main__':
-    img = cv.imread('object.png')
-    img = color_matching(img)
-    
-    while True:
-        cv.namedWindow('orb',cv.WINDOW_NORMAL)
-        cv.imshow('orb', img[0])
-        ch = cv.waitKey(1)
-        if ch == ord('q'):
-            break
-
-    cv.destroyAllWindows()    
+   
     

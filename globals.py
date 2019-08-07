@@ -14,5 +14,5 @@ def initialize():
     longitude = 0
     altitude = 0
     image_processing_begin = False
-    image_processing_send = True
+    image_processing_send = False
     image_processing_abort = False

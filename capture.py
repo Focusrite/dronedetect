@@ -1,3 +1,9 @@
+# capture.py
+
+# Defines the Capture class used for accessing cameras
+# More or less identical to cap.py, but
+# here a serial number is needed to connect to a camera
+
 import numpy as np
 import cv2 as cv
 import time
@@ -24,7 +30,6 @@ class Capture(object):
                     self.camera = pylon.InstantCamera(tlFactory.CreateDevice(device))
                     print("Serial: ", device.GetSerialNumber())    
             print("devices")
-            #self.camera = pylon.InstantCamera(pylon.TlFactory.GetInstance().CreateFirstDevice())
             self.camera.Open()
             print("Connecting to camera:", self.camera.GetDeviceInfo().GetModelName())
         except genicam.GenericException as e:
@@ -40,7 +45,6 @@ class Capture(object):
         self.set_param('AcquisitionFrameRateEnable', True)
         self.set_param('AcquisitionFrameRateAbs', 20.0)
         self.set_param('GevSCPD', 1800)
-        #self.set_param('ExposureTimeAbs', 10000)
         return self
 
     def grab(self):
@@ -97,7 +101,6 @@ if __name__ == '__main__':
     print("Image resolution2: " + str(width2) + ", " + str(height2))
     cap1.start()
     cap2.start()
-    i = 0
     while True:
         im1 = cap1.grab()
         im2 = cap2.grab()
@@ -111,17 +114,7 @@ if __name__ == '__main__':
         ch = cv.waitKey(1)
         if ch == 27 or ch == ord('q'):
             break
-        if ch == ord('s'):
-            while i < 30:
-                im = cap1.grab()
-                cv.imwrite('calibration_images2/calib_' + str(i) + '.png', im)
-                i = i + 1
-                im = cap1.grab()
-                time.sleep(2)
-            #temp = cv.selectROI(im)
-            #cv.imwrite('object.png',im)
-            break
-
+        
     cap1.stop()
     cap2.stop()
     cv.destroyAllWindows()

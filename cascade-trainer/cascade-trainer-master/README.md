@@ -1,5 +1,7 @@
 ## What is this?
 
+This is from https://github.com/MCGallaspy/cascade-trainer and has not been written as part of the dronedetect project.
+
 A set of Python scripts for easily creating a Haar cascade object detector using OpenCV.
 OpenCV has some tool for this already, which these scripts complement.
 For example, there is a script for automatically downloading images from Google's custom search engine API.
@@ -98,8 +100,6 @@ at, so you can always add more stages later if needed.
 ```bash
 >> python train.py
 ```
-
-Fungerar!
 
 If the number of images is too low or some images are too similar, then the classifier may fail early. In that case,
 run `train.py` with the `--dry-run` option, copy the command that would have been run, and specify that a fewer

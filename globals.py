@@ -1,3 +1,7 @@
+# globals.py
+# Contains the global variables used for communication
+# between image processing and server
+
 def initialize():
     global image_processing_begin
     global image_processing_send

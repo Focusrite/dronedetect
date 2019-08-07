@@ -12,7 +12,7 @@ IPADDR = '10.19.18.85'
 def connect_to_server(ipaddr):
 	try:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		print(sock)
+		#print(sock)
 	except socket.error as err:
 		print("Socket creation error")
 		return -1
@@ -20,7 +20,6 @@ def connect_to_server(ipaddr):
 	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 	try:
-		print(sock)
 		sock.connect((ipaddr, PORT))
 	except socket.error as err:
 		print("Error connecting to server")

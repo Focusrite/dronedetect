@@ -135,19 +135,19 @@ def tracking():
                     cv.rectangle(frame2, top_left2, bottom_right2, (255, 0, 0), 3)
 
 
-                # Show frames in windows
-                if frame1 is not None:
-                    cv.namedWindow('camera1', cv.WINDOW_NORMAL)
-                    cv.imshow('camera1', frame1)
-                if frame2 is not None:
-                    cv.namedWindow('camera2', cv.WINDOW_NORMAL)
-                    time = cv.getTickCount() - timer
-                    cv.putText(frame2, "time: " + str(time / cv.getTickFrequency()), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 3)
-                    cv.imshow('camera2', frame2)
+            # Show frames in windows
+            if frame1 is not None:
+                cv.namedWindow('camera1', cv.WINDOW_NORMAL)
+                cv.imshow('camera1', frame1)
+            if frame2 is not None:
+                cv.namedWindow('camera2', cv.WINDOW_NORMAL)
+                time = cv.getTickCount() - timer
+                cv.putText(frame2, "time: " + str(time / cv.getTickFrequency()), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 3)
+                cv.imshow('camera2', frame2)
     
-                ch = cv.waitKey(1)
-                if ch == ord('q'):
-                    break
+            ch = cv.waitKey(1)
+            if ch == ord('q'):
+                break
 
     cap1.stop()
     cap2.stop()

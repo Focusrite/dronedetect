@@ -1,3 +1,5 @@
+# gps.py
+
 import numpy as np
 import math
 
@@ -70,5 +72,4 @@ def edn_from_camera(camera_coords, angle):
     R = np.array([[cos, 0, sin], [0, 1, 0], [-sin, 0, cos]])
 
     return np.matmul(R, camera_coords)
-    
-gps_from_edn(np.array([[55], [5], [200]]), np.array([[0], [-100], [0]]))    
+     

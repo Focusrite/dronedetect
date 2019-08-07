@@ -37,7 +37,7 @@ Install necessary libraries;
 Download and install the Basler pylon drivers.
 To install pypylon, first export PYLON_ROOT="/PATH/TO/PYLON" then run pip install in pypylon
 the folder where it was cloned. E.g.
-`export PYLON_ROOT="/home/user/sommarjobb/pylon/pylon5"`
+`export PYLON_ROOT="/home/user/Sommarjobb/pylon/pylon5"`
 
 To then install pypylon do;
 `git clone https://github.com/basler/pypylon.git`

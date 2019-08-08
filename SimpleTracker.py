@@ -1,6 +1,6 @@
 # SimpleTracker.py
-# Defines the class SimpleTracker
 # Based on/stolen from https://www.pyimagesearch.com/2018/07/23/simple-object-tracking-with-opencv/
+# Defines the class SimpleTracker which can track multiple objects
 
 import numpy as np
 import math
@@ -119,6 +119,4 @@ class SimpleTracker():
                     self.register(inputCenters[col])
             return self.objects            
 
-simpleTracker = SimpleTracker()
-rects = []
 

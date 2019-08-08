@@ -2,7 +2,6 @@
 
 import numpy as np
 import cv2 as cv
-from pypylon import pylon
 
 # Function that tries to find red areas in an image img
 # Returns img, found, top_left, bottom_right where:
@@ -12,9 +11,9 @@ from pypylon import pylon
 # of the found area
 def color_matching(img):
     # Initialize default values
-    x, y, radius = 0, 0, 0
-    found = False
     MIN_RADIUS = 8
+    bbox = [0, 0, 0, 0]
+    found = False
 
     # Blur image
     img = cv.GaussianBlur(img, (5, 5), 0)
@@ -32,20 +31,18 @@ def color_matching(img):
     upper_red = np.array([180, 255, 255])
     mask2 = cv.inRange(hsv, lower_red, upper_red)
 
+    # Add the two masks
     mask = mask1 + mask2
-    #mask = cv.erode(mask, None, iterations=2)
-    #mask = cv.dilate(mask, None, iterations=2)
 
     # Find contours
     cnts, _ = cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-    center = None
 
     if len(cnts) > 0:
         # Pick the largest contour
         c = max(cnts, key=cv.contourArea)
 
         # Find the smallest enclosing circle
-        ((x, y), radius) = cv.minEnclosingCircle(c)
+        _, radius = cv.minEnclosingCircle(c)
         # Find the bounding rectangle
         bbox = cv.boundingRect(c)
 
@@ -53,7 +50,7 @@ def color_matching(img):
             found = True
             cv.rectangle(img, (bbox[0], bbox[0] + bbox[2]), (bbox[1], bbox[1] + bbox[3]), (0, 255, 0), 3)
     return img, found, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3])        
-    #return img, found, (int(x) - int(radius), int(y) - int(radius)),( int(x) + int(radius), int(y) + int(radius))   
+  
 
    
     

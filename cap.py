@@ -80,7 +80,6 @@ if __name__ == '__main__':
     height = cap.get_param("Height")
     print("Image resolution: " + str(width) + ", " + str(height))
     cap.start()
-    i = 0
     while True:
         im = cap.grab()
         if im is None:

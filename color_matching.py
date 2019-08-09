@@ -4,8 +4,8 @@ import numpy as np
 import cv2 as cv
 
 # Function that tries to find red areas in an image img
-# Returns img, found, top_left, bottom_right where:
-# img = the image, with a rectangle drawn around the found area
+# Returns image, found, top_left, bottom_right where:
+# image = the image, with a rectangle drawn around the found area
 # found = true if a red area has been found
 # top_left, bottom_right = the top left and bottom right corners
 # of the found area

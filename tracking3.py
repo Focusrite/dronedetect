@@ -1,19 +1,18 @@
 import cv2 as cv
 import numpy as np
-import threading
-import queue
 import math
 from pypylon import pylon
 from color_matching import color_matching
 from capture import Capture
 from SimpleTracker import SimpleTracker
 from collections import OrderedDict
-from image_processing import *
-from gps import *
+import image_processing
+import gps
 import globals
 from triangulator import Triangulator
 
 def tracking():
+    # Initiera globala variabler
     globals.initialize()
 
     # Create Triangulator object
@@ -44,10 +43,10 @@ def tracking():
     tracker2 = SimpleTracker()
 
     #Set up connection to server
-    sock = connect_to_server('192.168.1.130')#10.19.17.203')#'192.168.0.100')
-    send_message(sock, 0, 'N', 0, 0, 0)
-    listening_thread = threading.Thread(target = read_message, args=(sock,), daemon = True)
-    listening_thread.start()
+    #sock = connect_to_server('192.168.1.130')
+    #send_message(sock, 0, 'N', 0, 0, 0)
+    #listening_thread = threading.Thread(target = read_message, args=(sock,), daemon = True)
+    #listening_thread.start()
 
     # Angle that indicates the direction that camera1 points
     # NORTH = 0, WEST = pi/2, SOUTH = pi, EAST = -pi/2
@@ -57,7 +56,7 @@ def tracking():
         if globals.image_processing_abort:
             break
 
-        if globals.image_processing_begin:
+        if True:#globals.image_processing_begin:
             timer = cv.getTickCount()
     
             points1 = None
@@ -95,8 +94,7 @@ def tracking():
 
             if points1 is not None and points2 is not None:
                 # Estimate balloon position relative to camera
-                # (angle is the angle between the two cameras)
-                pos = triangulator.triangulate(points1.astype('float32'), points2.astype('float32'))#, from_file=False, angle = 0, theta = 0)# angle = -math.pi/9, theta=angle
+                pos = triangulator.triangulate(points1.astype('float32'), points2.astype('float32'))
 
                 # Start the kalman filter if this was the first measurement
                 if not initiated:
@@ -112,20 +110,13 @@ def tracking():
 
                 # Convert to gps position
                 # We must multiply pos with 0.001 since pos is in mm and gps_from_edn expects m
-                #gps_pos = gps_from_edn(np.array([[58.4035], [15.6850], [55]]), pos * 0.001).astype('float32')
                 gps_pos = gps_from_edn(np.array([[globals.latitude], [globals.longitude], [globals.altitude]]), corr_pos * 0.001).astype('float64')
-                #print("GPS: ",gps_pos)
-
-
 
                 if globals.image_processing_send:
-                    print("Lat: ", globals.latitude)
-                    print("Long: ", globals.longitude)
-                    print("Alt: ", globals.altitude)
                     send_message(sock, 1, 'M', gps_pos[1, 0], gps_pos[0, 0], gps_pos[2, 0])
                     globals.image_processing_send = False
         
-                #cv.putText(frame1, "Estimated position : " + str(int(gps_pos[0, 0])) + " " + str(int(gps_pos[1, 0])) + " " + str(int(gps_pos[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
+                cv.putText(frame1, "Estimated position : " + str(int(gps_pos[0, 0])) + " " + str(int(gps_pos[1, 0])) + " " + str(int(gps_pos[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
 
                 # Draw rectangles around the found balloons
                 if has_detected:
@@ -146,12 +137,11 @@ def tracking():
                 cv.imshow('camera2', frame2)
     
             ch = cv.waitKey(1)
-            if ch == ord('q'):
+            if ch == 27 or ch == ord('q'):
                 break
 
     cap1.stop()
     cap2.stop()
-    #listening_thread.join()
     cv.destroyAllWindows()
 
 tracking()    

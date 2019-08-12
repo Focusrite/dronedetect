@@ -48,7 +48,7 @@ def color_matching(img):
 
         if radius > MIN_RADIUS:
             found = True
-            cv.rectangle(img, (bbox[0], bbox[0] + bbox[2]), (bbox[1], bbox[1] + bbox[3]), (0, 255, 0), 3)
+            cv.rectangle(img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (0, 255, 0), 3)
     return img, found, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3])        
   
 

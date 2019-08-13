@@ -1,98 +1,158 @@
-#---- Image processing client ----
-#--------- Written 2019 ----------
-import socket
-from struct import *
-import threading
+# image_processing.py
+# Main program for the image processing module
+
+import cv2 as cv
+import numpy as np
+import math
+from pypylon import pylon
+from color_matching import color_matching
+from capture import Capture
+from SimpleTracker import SimpleTracker
+from collections import OrderedDict
+from TCPClient import *
+from gps import *
 import globals
+from triangulator import Triangulator
 
-PORT = 8085
-IPADDR = '10.19.18.85'
+def tracking():
+    # Initiera globala variabler
+    globals.initialize()
 
-#Function connects up to server and sets sock
-def connect_to_server(ipaddr):
-	try:
-		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		print(sock)
-	except socket.error as err:
-		print("Socket creation error")
-		return -1
+    # Create Triangulator object
+    triangulator = Triangulator()
+    
+    # Serial numbers for the two cameras
+    serial1 = "40016577"
+    serial2 = "21810700"
 
-	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    # Create Capture objects for the cameras
+    cap1 = Capture(serial1)
+    cap2 = Capture(serial2)
 
-	try:
-		sock.connect((ipaddr, PORT))
-	except socket.error as err:
-		print("Error connecting to server")
-		return -1
+    # Start cameras
+    cap1.start()
+    cap2.start()
 
-	return sock
+    # Kalman filter
+    kalman = cv.KalmanFilter(3, 3)
+    kalman.transitionMatrix = np.eye(3).astype('float32')
+    kalman.measurementMatrix = np.eye(3).astype('float32')
+    kalman.measurementNoiseCov = np.array([[7.13, 0.0, 0.0], [0.0, 11.02, 0.0], [0.0, 0.0, 100.62]]).astype('float32')
+    initiated = False
+    initial = np.array([[0.0], [0.0], [0.0]])
 
-#Function creates an message (one of the predefined ones at the top of this 
-#file) and sends it
-def send_message(sock, typ, receiver, lon, lat, alt):
-	#Init message
-	if typ == 0:
-		sock.send(pack('icc', typ, b'I', b'N'))
+    # Trackers
+    tracker1 = SimpleTracker()
+    tracker2 = SimpleTracker()
 
-	#Coord message
-	elif typ == 1:
-		sock.send(pack('iccddd', typ, b'I', receiver.encode('ascii'), lon, lat, alt))
+    #Set up connection to server
+    sock = connect_to_server('192.168.1.130')
+    send_message(sock, 0, 'N', 0, 0, 0)
+    listening_thread = threading.Thread(target = read_message, args=(sock,), daemon = True)
+    listening_thread.start()
 
-	else:
-		print("message type not recognized")
+    # Angle that indicates the direction that camera1 points
+    # NORTH = 0, WEST = pi/2, SOUTH = pi, EAST = -pi/2
+    angle = 0
 
-#Function constantly reads from socket
-def read_message(sock):
-	while True:
-		buff = sock.recv(1024)
-		if buff:
-			#The message is an init message
-			if int(buff[0]) == 0:
-				msg = unpack('icc', buff[0:calcsize('icc')])
-				print("Init message")
+    times_found = 0
 
-			#The message is a coord message
-			elif int(buff[0]) == 1:
-				msg = unpack('iccddd', buff[0:calcsize('iccddd')])
-				lon = msg[3] #Is a float
-				lat = msg[4] #Is a float
-				alt = msg[5] #Is a float
-				print("Coord message, alt: " + str(alt))
-				#Set global variables needed by main program
-				globals.image_processing_begin = True
-				globals.image_processing_send = True
-				globals.latitude = lat
-				globals.longitude = lon
-				globals.altitude = alt
+    while True:
+        if globals.image_processing_abort:
+            break
 
-			#The message is a start message
-			elif int(buff[0]) == 2:
-				msg = unpack('icc', buff[0:calcsize('icc')])
-				print("Start message")
+        if globals.image_processing_begin:
+            timer = cv.getTickCount()
+    
+            points1 = None
+            points2 = None
+    
+            # Grab image from cameras
+            frame1 = cap1.grab()
+            frame2 = cap2.grab()
 
-			#The message is an abort message
-			elif int(buff[0]) == 3:
-				msg = unpack('icc', buff[0:calcsize('icc')])
-				globals.image_processing_abort = True
-				print("Abort message")
+            if frame1 is not None and frame2 is not None:
+                # Detect the balloon
+                im, has_detected, top_left1, bottom_right1 = color_matching(frame1)        
+                im, has_detected2, top_left2, bottom_right2 = color_matching(frame2)
 
-			#The message is a status message
-			elif int(buff[0]) == 4:
-				msg = unpack('iccdddi', buff[0:calcsize('iccdddi')])
-				print("Status message")
+                # Update trackers
+                if has_detected:
+                    objects1 = tracker1.update([(top_left1[0], top_left1[1], bottom_right1[0], bottom_right1[1])])
+                else:
+                    objects1 = tracker1.update([])
+                if has_detected2:
+                    objects2 = tracker2.update([(top_left2[0], top_left2[1], bottom_right2[0], bottom_right2[1])])
+                else:
+                    objects2 = tracker2.update([])
+            else:
+                print("Error. empty frame\n")
+                break
 
-			#The message is not recognized
-			else:
-				print("Message not recognized")
+            # Find the center of the balloon
+            if bool(objects1):
+                obj = list(objects1.items())
+                points1 = np.array([[[obj[0][1][0], obj[0][1][1]]]])
+            if bool(objects2):
+                obj = list(objects2.items())
+                points2 = np.array([[[obj[0][1][0], obj[0][1][1]]]])
 
-#How to connect to the server (do once)
-#sock = connect_to_server(IPADDR)
-#How to tell server that you are the image processing client (do once)
-#send_message(sock, 0, 'N', 0, 0, 0)
-#How to start the listening thread (do once)
-#listening_thread = threading.Thread(target=read_message, args=(sock,), daemon=True)
-#listening_thread.start()
-#How to send a message, this is a coordinate message to main with lon 10, lat 11 and alt 12. This should not be used more than about once per second
-#send_message(sock, 1, 'M', 10, 11, 12)
-#How to close the listening thread, do this at the end of the code once (outside of the while loop)
-#listening_thread.join()
+            if points1 is not None and points2 is not None:
+                times_found += 1
+                
+                # Estimate balloon position relative to camera
+                pos = triangulator.triangulate(points1.astype('float32'), points2.astype('float32'))
+
+                # Start the kalman filter if this was the first measurement
+                if not initiated:
+                    initial = pos.astype('float32')
+                    initiated = True
+
+                # Update kalman filter
+                pred = kalman.predict() + initial
+                corr_pos = kalman.correct(pos - initial) + initial
+            
+                # Convert to EDN coordinates
+                corr_pos = edn_from_camera(pos, angle).astype('float64')
+
+                # Convert to gps position
+                # We must multiply pos with 0.001 since pos is in mm and gps_from_edn expects m
+                gps_pos = gps_from_edn(np.array([[globals.latitude], [globals.longitude], [globals.altitude]]), corr_pos * 0.001).astype('float64')
+
+                if globals.image_processing_send and times_found > 10:
+                    send_message(sock, 1, 'M', gps_pos[1, 0], gps_pos[0, 0], gps_pos[2, 0])
+                    globals.image_processing_send = False
+        
+                cv.putText(frame1, "Estimated position : " + str(int(corr_pos[0, 0])) + " " + str(int(corr_pos[1, 0])) + " " + str(int(corr_pos[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
+
+                # Draw rectangles around the found balloons
+                if has_detected:
+                    cv.rectangle(frame1, top_left1, bottom_right1, (255, 0, 0), 3)
+
+                if has_detected2:    
+                    cv.rectangle(frame2, top_left2, bottom_right2, (255, 0, 0), 3)
+
+
+            # Show frames in windows
+            if frame1 is not None:
+                cv.namedWindow('camera1', cv.WINDOW_NORMAL)
+                cv.imshow('camera1', frame1)
+            if frame2 is not None:
+                cv.namedWindow('camera2', cv.WINDOW_NORMAL)
+                time = cv.getTickCount() - timer
+                cv.putText(frame2, "time: " + str(time / cv.getTickFrequency()), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 3)
+                cv.imshow('camera2', frame2)
+    
+            ch = cv.waitKey(1)
+            if ch == 27 or ch == ord('q'):
+                break
+
+    cap1.stop()
+    cap2.stop()
+    cv.destroyAllWindows()
+
+tracking()    
+                
+        
+            
+                                                                            

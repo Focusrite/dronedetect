@@ -15,7 +15,7 @@ def template_matching(img, template, interval):
     img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     img2 = img_gray.copy() # Keep a copy of the original
     found = None
-    MIN_VALUE = 0.7 # minimum value needed to be a match
+    MIN_VALUE = 0.75# minimum value needed to be a match
 
     w, h = template.shape[::-1]
 
@@ -37,6 +37,9 @@ def template_matching(img, template, interval):
         if found is None or max_val > found[0]:
             found = (max_val, max_loc, r)
 
+    if found is None:
+        return img, False, (0, 0), (0, 0), 1
+    
     (max_val, max_loc, r) = found
     (startX, startY) = (int(max_loc[0] * r), int(max_loc[1]* r)) # top left corner
     (endX, endY) = (int((max_loc[0] + w) * r), int((max_loc[1] + h)*r)) # bottom right corner

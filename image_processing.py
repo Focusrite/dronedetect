@@ -113,11 +113,12 @@ def tracking():
                 corr_pos = kalman.correct(pos - initial) + initial
             
                 # Convert to EDN coordinates
-                corr_pos = edn_from_camera(pos, angle).astype('float64')
+                corr_pos = edn_from_camera(corr_pos, angle).astype('float64')
 
                 # Convert to gps position
                 # We must multiply pos with 0.001 since pos is in mm and gps_from_edn expects m
-                gps_pos = gps_from_edn(np.array([[globals.latitude], [globals.longitude], [globals.altitude]]), corr_pos * 0.001).astype('float64')
+                gps_pos = gps_from_edn(np.array([[globals.latitude], [globals.longitude], [globals.altitude]]).astype('float64'), corr_pos * 0.001)
+                print(gps_pos)
 
                 if globals.image_processing_send and times_found > 10:
                     send_message(sock, 1, 'M', gps_pos[1, 0], gps_pos[0, 0], gps_pos[2, 0])

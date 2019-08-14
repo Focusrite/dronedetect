@@ -5,7 +5,8 @@ from color_matching import color_matching
 from capture import Capture
 
 def detect(img):
-    MIN_WIDTH = 50
+    MIN_WIDTH = 28
+    MIN_VALUE = 0.3
     found = False
     top_left = None
     bottom_right = None
@@ -37,17 +38,25 @@ def detect(img):
         while True:
             c = cnts_sorted[i]
             bbox = cv.boundingRect(c)
+            cv.rectangle(img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0), 3)
             if bbox[2] < MIN_WIDTH or bbox[3] < MIN_WIDTH:
-                return img, False, top_left, bottom_right
                 break
             cropped = img[bbox[1]:bbox[1]+bbox[3], bbox[0]:bbox[0]+bbox[2]].copy()
             if cropped is None:
                 print("Error: cropped is none")
-            cropped, found, tl, br, r = template_matching(cropped, template, interval)
-            if found:
-                cv.rectangle(img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1]+bbox[3]), (0, 255, 0), 3)
-                return img, True, (bbox[0]+ tl[0], bbox[1] + tl[1]), (bbox[0] + bbox[2] + br[0], bbox[1] + bbox[3] + br[1])
+            cropped, found, tl, br, max_val = template_matching(cropped, template, interval, min_value = MIN_VALUE)
+            if max_val < 0.4:
+                color = (0, 0, 255)
+            elif max_val < 0.8:
+                color = (0, 255, 255)
+            else:
+                color = (0, 255, 0)
+            cv.rectangle(img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1]+bbox[3]), color, 3)
+            #if found:
+                #cv.rectangle(img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1]+bbox[3]), (0, 255, 0), 3)
+                #return img, True, (bbox[0]+ tl[0], bbox[1] + tl[1]), (bbox[0] + bbox[2] + br[0], bbox[1] + bbox[3] + br[1])
             i += 1
+    return img, False, top_left, bottom_right
     
 
 if __name__ == '__main__':

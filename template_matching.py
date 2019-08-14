@@ -11,11 +11,11 @@ import numpy as np
 # top_left = top left corner of the match
 # bottom_right = bottom right corner of the match
 # r = indicates which scale factor the match was found for
-def template_matching(img, template, interval):
+def template_matching(img, template, interval, min_value=0.75):
     img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     img2 = img_gray.copy() # Keep a copy of the original
     found = None
-    MIN_VALUE = 0.75# minimum value needed to be a match
+    MIN_VALUE = min_value# minimum value needed to be a match
 
     w, h = template.shape[::-1]
 
@@ -45,5 +45,5 @@ def template_matching(img, template, interval):
     (endX, endY) = (int((max_loc[0] + w) * r), int((max_loc[1] + h)*r)) # bottom right corner
     cv.rectangle(img, (startX, startY), (endX, endY), (0, 255, 0), 2)
 
-    return img, max_val > MIN_VALUE, (startX, startY), (endX, endY), r 
+    return img, max_val > MIN_VALUE, (startX, startY), (endX, endY), max_val 
    

@@ -5,13 +5,17 @@ from color_matching import color_matching
 from capture import Capture
 
 def detect(img):
-    MIN_WIDTH = 28
+    MIN_WIDTH = 30
     MIN_VALUE = 0.3
     found = False
     top_left = None
     bottom_right = None
 
-    template = cv.imread("balloon.png", 0)
+    template = cv.imread("template.png")
+    #cv.imwrite("template_test.png", template)
+    hsv_template = cv.cvtColor(template, cv.COLOR_BGR2HSV)
+    template = cv.cvtColor(template, cv.COLOR_BGR2GRAY)
+    template = cv.Canny(template, 50, 200)
     interval = (0.8, 1.2, 5)
     
     # Blur image
@@ -19,15 +23,24 @@ def detect(img):
 
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
 
-    lower_red = np.array([0, 130, 120])
-    upper_red = np.array([10, 255, 255])
+    lower_red = np.array([0, 130, 70])
+    upper_red = np.array([8, 255, 255])
     mask1 = cv.inRange(hsv, lower_red, upper_red)
+    t_mask1 = cv.inRange(hsv_template, lower_red, upper_red)
 
-    lower_red = np.array([170, 120, 120])
+    lower_red = np.array([172, 130, 70])
     upper_red = np.array([180, 255, 255])
     mask2 = cv.inRange(hsv, lower_red, upper_red)
+    t_mask2 = cv.inRange(hsv_template, lower_red, upper_red)
 
     mask = mask1 + mask2
+    mask = cv.dilate(mask, None, iterations = 2)
+    t_mask = t_mask1 + t_mask2
+    t_mask = cv.dilate(t_mask, None, iterations = 2)
+    t_cnts, _ = cv.findContours(t_mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    temp_cnts = max(t_cnts, key=cv.contourArea)
+    temp = cv.drawContours(template, [temp_cnts], 0, (255, 0, 0))
+    cv.imwrite("test.png", temp)
 
     cnts, _ = cv.findContours(mask.copy(), cv.RETR_EXTERNAL,
                               cv.CHAIN_APPROX_SIMPLE)
@@ -39,18 +52,23 @@ def detect(img):
             c = cnts_sorted[i]
             bbox = cv.boundingRect(c)
             cv.rectangle(img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), (255, 0, 0), 3)
-            if bbox[2] < MIN_WIDTH or bbox[3] < MIN_WIDTH:
+            img = cv.drawContours(img, [c], 0, (255, 0, 0), 2)
+            if bbox[2] < MIN_WIDTH or bbox[3] < MIN_WIDTH or cv.contourArea(c) < 400:
                 break
             cropped = img[bbox[1]:bbox[1]+bbox[3], bbox[0]:bbox[0]+bbox[2]].copy()
             if cropped is None:
                 print("Error: cropped is none")
-            cropped, found, tl, br, max_val = template_matching(cropped, template, interval, min_value = MIN_VALUE)
-            if max_val < 0.4:
-                color = (0, 0, 255)
-            elif max_val < 0.8:
+            #cropped, found, tl, br, max_val = template_matching(cropped, template, interval, min_value = MIN_VALUE)
+            max_val = cv.matchShapes(temp_cnts, c, 1, 0.0)
+            if max_val < 0.1:
+                #print(bbox, " ", max_val)
+                color = (0, 255, 0)
+                cv.rectangle(img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1]+bbox[3]), color, 3)
+                return img, True, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3])
+            elif max_val < 0.3:
                 color = (0, 255, 255)
             else:
-                color = (0, 255, 0)
+                color = (0, 0, 255)
             cv.rectangle(img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1]+bbox[3]), color, 3)
             #if found:
                 #cv.rectangle(img, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1]+bbox[3]), (0, 255, 0), 3)
@@ -86,7 +104,7 @@ if __name__ == '__main__':
             break
         time = cv.getTickCount() - timer
         time = time / cv.getTickFrequency()
-        #print(time)
+        print(time)
     cap1.stop()
     cap2.stop()
     cv.destroyAllWindows()

@@ -5,7 +5,6 @@ import cv2 as cv
 import numpy as np
 import math
 from pypylon import pylon
-from color_matching import color_matching
 from capture import Capture
 from SimpleTracker import SimpleTracker
 from collections import OrderedDict
@@ -13,6 +12,7 @@ from TCPClient import *
 from gps import *
 import globals
 from triangulator import Triangulator
+from detector import Detector
 
 def tracking():
     # Initiera globala variabler
@@ -20,6 +20,9 @@ def tracking():
 
     # Create Triangulator object
     triangulator = Triangulator()
+
+    # Create Detector object
+    detector = Detector()
     
     # Serial numbers for the two cameras
     serial1 = "40016577"
@@ -73,8 +76,8 @@ def tracking():
 
             if frame1 is not None and frame2 is not None:
                 # Detect the balloon
-                im, has_detected, top_left1, bottom_right1 = color_matching(frame1)        
-                im, has_detected2, top_left2, bottom_right2 = color_matching(frame2)
+                im, has_detected, top_left1, bottom_right1 = detector.detection(frame1)        
+                im, has_detected2, top_left2, bottom_right2 = detector.detection(frame2)
 
                 # Update trackers
                 if has_detected:
@@ -98,40 +101,41 @@ def tracking():
                 points2 = np.array([[[obj[0][1][0], obj[0][1][1]]]])
 
             if points1 is not None and points2 is not None:
-                times_found += 1
                 
                 # Estimate balloon position relative to camera
                 pos = triangulator.triangulate(points1.astype('float32'), points2.astype('float32'))
 
-                # Start the kalman filter if this was the first measurement
-                if not initiated:
-                    initial = pos.astype('float32')
-                    initiated = True
+                if pos[2, 0] > 0: # Estimated position must be in front of camera
+                    times_found += 1
+                    
+                    # Start the kalman filter if this was the first measurement
+                    if not initiated:
+                        initial = pos.astype('float32')
+                        initiated = True
 
-                # Update kalman filter
-                pred = kalman.predict() + initial
-                corr_pos = kalman.correct(pos - initial) + initial
+                    # Update kalman filter
+                    pred = kalman.predict() + initial
+                    corr_pos = kalman.correct(pos - initial) + initial
             
-                # Convert to EDN coordinates
-                corr_pos = edn_from_camera(corr_pos, angle).astype('float64')
+                    # Convert to EDN coordinates
+                    corr_pos = edn_from_camera(corr_pos, angle).astype('float64')
 
-                # Convert to gps position
-                # We must multiply pos with 0.001 since pos is in mm and gps_from_edn expects m
-                gps_pos = gps_from_edn(np.array([[globals.latitude], [globals.longitude], [globals.altitude]]).astype('float64'), corr_pos * 0.001)
-                print(gps_pos)
+                    # Convert to gps position
+                    # We must multiply pos with 0.001 since pos is in mm and gps_from_edn expects m
+                    gps_pos = gps_from_edn(np.array([[globals.latitude], [globals.longitude], [globals.altitude]]).astype('float64'), corr_pos * 0.001)
 
-                if globals.image_processing_send and times_found > 10:
-                    send_message(sock, 1, 'M', gps_pos[1, 0], gps_pos[0, 0], gps_pos[2, 0])
-                    globals.image_processing_send = False
+                    if globals.image_processing_send and times_found > 10:
+                        send_message(sock, 1, 'M', gps_pos[1, 0], gps_pos[0, 0], gps_pos[2, 0])
+                        globals.image_processing_send = False
         
-                cv.putText(frame1, "Estimated position : " + str(int(corr_pos[0, 0])) + " " + str(int(corr_pos[1, 0])) + " " + str(int(corr_pos[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
+                    cv.putText(frame1, "Estimated position : " + str(int(corr_pos[0, 0])) + " " + str(int(corr_pos[1, 0])) + " " + str(int(corr_pos[2, 0])), (100, 200), cv.FONT_HERSHEY_SIMPLEX, 1.75, (255, 255, 0), 3)
 
-                # Draw rectangles around the found balloons
-                if has_detected:
-                    cv.rectangle(frame1, top_left1, bottom_right1, (255, 0, 0), 3)
+            # Draw rectangles around the found balloons
+            if has_detected:
+                cv.rectangle(frame1, top_left1, bottom_right1, (255, 0, 0), 3)
 
-                if has_detected2:    
-                    cv.rectangle(frame2, top_left2, bottom_right2, (255, 0, 0), 3)
+            if has_detected2:    
+                cv.rectangle(frame2, top_left2, bottom_right2, (255, 0, 0), 3)
 
 
             # Show frames in windows

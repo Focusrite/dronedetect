@@ -26,13 +26,11 @@ class SimpleTracker():
         self.objects[self.nextObjectID] = center
         self.lost_frames[self.nextObjectID] = 0
         self.nextObjectID += 1
-        print("Adding object to track")
 
     # Remove an object so that we do not track it anymore    
     def deregister(self, objectID):
         del self.objects[objectID]
         del self.lost_frames[objectID]
-        print("Removing object to track")
 
     # Update the tracker given rectangles in which objects are detected    
     def update(self, rects):

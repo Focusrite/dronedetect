@@ -7,6 +7,7 @@ class Detector(object):
     def __init__(self):
         self.MIN_WIDTH = 30
         self.MIN_VALUE = 0.75
+        self.MAX_VALUE = 0.15
 
         temp = cv.imread("template.png")
         temp = cv.cvtColor(temp, cv.COLOR_BGR2HSV)
@@ -18,7 +19,7 @@ class Detector(object):
         cnts, _ = cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
         self.template = max(cnts, key=cv.contourArea)
         if self.template is None:
-            print("Error no template found")
+            print("Error: no template found")
 
     def color_detection(self, img):
         found = False
@@ -61,7 +62,7 @@ class Detector(object):
                     return img, False, [0, 0], [0, 0]
                     break
                 match = cv.matchShapes(self.template, c, 1, 0.0)
-                if match < 0.15:
+                if match < self.MAX_VALUE:
                     return img, True, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3])
                 i += 1
         return img, False, [0, 0], [0, 0]

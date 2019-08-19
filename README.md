@@ -44,7 +44,7 @@ To then install pypylon do;
 `cd pypylon`
 `pip install .`
 
-Follow instructions in the userguide to set up and calibrate cameras etc.
+Follow instructions in Dokumentation/userguide to set up and calibrate cameras etc.
 
 All done! To run, do
 `python image_processing.py` 

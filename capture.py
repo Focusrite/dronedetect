@@ -19,6 +19,7 @@ class Capture(object):
         self.converter.OutputBitAlignment = pylon.OutputBitAlignment_MsbAligned
         self.connect(serial)    
 
+    # Connect to the camera with the given serial number
     def connect(self, serial):
         try:
             tlFactory = pylon.TlFactory.GetInstance()
@@ -36,6 +37,7 @@ class Capture(object):
             self.camera = None
             pass
 
+    # Start camera
     def start(self):
         if self.camera is None:
             print("Error: Not connected to camera, can't start grabbing.")
@@ -47,6 +49,7 @@ class Capture(object):
         self.set_param('GevSCPD', 1800)
         return self
 
+    # Take a picture
     def grab(self):
         if self.camera is None or not self.camera.IsGrabbing():
             print("Error: Not connected to camera or not grabbing")
@@ -64,6 +67,7 @@ class Capture(object):
         result.Release()
         return img
 
+    # Stop camera
     def stop(self):
         if self.camera is None:
             print("Error: Camera not started, can't stop.")
@@ -73,6 +77,7 @@ class Capture(object):
         self.camera = None
         return self
 
+    # Sets a parameter
     def set_param(self, param, value):
         if self.camera is None:
             print("Error: Not connected to any camera.")
@@ -80,6 +85,7 @@ class Capture(object):
         setattr(self.camera, param, value)
         return self
 
+    # Get parameter value
     def get_param(self, param):
         if self.camera is None:
             print("Error: Not connected to any camera.")

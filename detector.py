@@ -64,20 +64,18 @@ class Detector(object):
         cnts = self.get_red_contours(img) # find contours
         # sort contours by contour area
         cnts_sorted = sorted(cnts, key=lambda x: cv.contourArea(x), reverse = True)
-        if len(cnts) > 0:
-            i = 0
-            while True:
-                c = cnts_sorted[i]
-                bbox = cv.boundingRect(c) # find bounding rectangle
-                if bbox[2] < self.MIN_WIDTH or bbox[3] < self.MIN_WIDTH:
-                    # if the rectangle is too small, return
-                    return img, False, [0, 0], [0, 0]
-                    break
-                match = cv.matchShapes(self.template, c, 1, 0.0) # match with template contour
-                if match < self.MAX_VALUE:
-                    # if match is close enough, it's a detection
-                    return img, True, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3])
-                i += 1
+        i = 0
+        while len(cnts) > i:
+            c = cnts_sorted[i]
+            bbox = cv.boundingRect(c) # find bounding rectangle
+            if bbox[2] < self.MIN_WIDTH or bbox[3] < self.MIN_WIDTH:
+                # if the rectangle is too small, return
+                return img, False, [0, 0], [0, 0]
+            match = cv.matchShapes(self.template, c, 1, 0.0) # match with template contour
+            if match < self.MAX_VALUE:
+                # if match is close enough, it's a detection
+                return img, True, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3])
+            i += 1
         return img, False, [0, 0], [0, 0]
 
     # Function that tries to detect red balloon using template matching
@@ -97,7 +95,7 @@ class Detector(object):
             r = img_gray.shape[1] / float(resized.shape[1])
 
             if resized.shape[0] < h or resized.shape[1] < w: # image must not be smaller than template
-                continue # break?
+                continue
 
             result = cv.matchTemplate(resized, template, cv.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv.minMaxLoc(result)
